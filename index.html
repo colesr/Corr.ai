@@ -930,19 +930,21 @@ function escapeHtml(s) {
 
 function applyFilters() {
   const q = state.filterText.trim().toLowerCase();
-  return state.feed.filter(item => {
-    const src = item.source || "curated";
-    if (!state.activeSources.has(src)) return false;
-    if (src === "curated") {
-      const anyDomain = item.domains.some(d => state.activeDomains.has(d));
-      if (!anyDomain) return false;
-    }
-    if (q) {
-      const hay = `${item.title} ${item.a} ${item.b} ${item.summary} ${item.why} ${item.domains.join(" ")}`.toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
+  return state.feed
+    .filter(item => {
+      const src = item.source || "curated";
+      if (!state.activeSources.has(src)) return false;
+      if (src === "curated") {
+        const anyDomain = item.domains.some(d => state.activeDomains.has(d));
+        if (!anyDomain) return false;
+      }
+      if (q) {
+        const hay = `${item.title} ${item.a} ${item.b} ${item.summary} ${item.why} ${item.domains.join(" ")}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => Math.abs(b.strength) - Math.abs(a.strength));
 }
 
 function render() {
