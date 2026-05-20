@@ -41,8 +41,44 @@
   header .grow { flex: 1; }
   header .status {
     font-size: 12px; color: var(--ink-dim);
+    position: relative;
   }
-  header .status b { color: var(--accent); font-weight: normal; }
+  header .status b {
+    color: var(--accent); font-weight: normal;
+    display: inline-block;
+    transition: color 0.4s ease;
+    transform-origin: center;
+  }
+  header .status b.bump {
+    animation: countBump 0.7s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes countBump {
+    0%   { transform: scale(1);    color: var(--accent); text-shadow: none; }
+    25%  { transform: scale(1.35); color: var(--accent-2);
+           text-shadow: 0 0 14px rgba(255,122,89,0.65); }
+    60%  { transform: scale(0.97); color: var(--accent-2); }
+    100% { transform: scale(1);    color: var(--accent); text-shadow: none; }
+  }
+  .delta-float {
+    position: absolute;
+    top: -2px;
+    font-size: 10px;
+    color: var(--accent-2);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    font-weight: 600;
+    animation: deltaFloat 1.3s cubic-bezier(.2,.6,.3,1) forwards;
+    text-shadow: 0 0 8px rgba(255,122,89,0.4);
+  }
+  @keyframes deltaFloat {
+    0%   { opacity: 0; transform: translateY(2px); }
+    18%  { opacity: 1; transform: translateY(-6px); }
+    100% { opacity: 0; transform: translateY(-26px); }
+  }
+  header .status .pulse.surge {
+    animation: pulse 0.35s ease-in-out 3;
+    background: var(--accent-2);
+  }
   main {
     max-width: 1200px; margin: 0 auto; padding: 20px 22px 80px;
     display: grid; grid-template-columns: 320px 1fr; gap: 22px;
@@ -947,11 +983,43 @@ function applyFilters() {
     .sort((a, b) => Math.abs(b.strength) - Math.abs(a.strength));
 }
 
+function updateCount() {
+  const el = document.getElementById("count");
+  const next = state.feed.length;
+  const prev = parseInt(el.dataset.last || "0", 10);
+  const isInitial = el.dataset.last === undefined;
+  el.textContent = next;
+  el.dataset.last = String(next);
+  if (isInitial || next <= prev) return;
+
+  el.classList.remove("bump");
+  // force reflow so the keyframe restarts even on rapid successive updates
+  void el.offsetWidth;
+  el.classList.add("bump");
+
+  const delta = next - prev;
+  const float = document.createElement("span");
+  float.className = "delta-float";
+  float.textContent = `+${delta}`;
+  // offset to the right of the count number so stacked floats spread
+  float.style.left = `${el.offsetLeft + el.offsetWidth + 4}px`;
+  el.parentElement.appendChild(float);
+  setTimeout(() => float.remove(), 1400);
+
+  const pulseEl = el.parentElement.querySelector(".pulse");
+  if (pulseEl) {
+    pulseEl.classList.remove("surge");
+    void pulseEl.offsetWidth;
+    pulseEl.classList.add("surge");
+    setTimeout(() => pulseEl.classList.remove("surge"), 1100);
+  }
+}
+
 function render() {
   const feedEl = document.getElementById("feed");
   feedEl.innerHTML = "";
   const items = applyFilters();
-  document.getElementById("count").textContent = state.feed.length;
+  updateCount();
   if (items.length === 0) {
     feedEl.innerHTML = `<div class="empty">No correlations match your filters.<br/>Try clearing the search or enabling more sources.</div>`;
     return;
