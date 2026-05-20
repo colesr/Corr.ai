@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CORR.AI — the unexpected correlation engine</title>
+<style>
+  :root {
+    --bg: #0c0d10;
+    --panel: #14161b;
+    --panel-2: #1b1e25;
+    --ink: #e8e6df;
+    --ink-dim: #8e8d86;
+    --line: #2a2d36;
+    --accent: #d6ff5c;
+    --accent-2: #ff7a59;
+    --accent-3: #6ad1ff;
+    --warn: #ffb454;
+    --bad: #ff5c7a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 14px; line-height: 1.55; }
+  a { color: var(--accent-3); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  header {
+    border-bottom: 1px solid var(--line);
+    padding: 18px 22px 14px;
+    display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;
+    position: sticky; top: 0; background: var(--bg); z-index: 5;
+  }
+  header h1 {
+    margin: 0; font-size: 18px; letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  header h1 .dot { color: var(--accent-2); }
+  header .tag {
+    color: var(--ink-dim); font-size: 12px; letter-spacing: 0.08em;
+  }
+  header .grow { flex: 1; }
+  header .status {
+    font-size: 12px; color: var(--ink-dim);
+  }
+  header .status b { color: var(--accent); font-weight: normal; }
+  main {
+    max-width: 1200px; margin: 0 auto; padding: 20px 22px 80px;
+    display: grid; grid-template-columns: 320px 1fr; gap: 22px;
+  }
+  @media (max-width: 880px) { main { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .panel h2 {
+    margin: 0; padding: 12px 14px; font-size: 12px; letter-spacing: 0.14em;
+    color: var(--ink-dim); border-bottom: 1px solid var(--line);
+    text-transform: uppercase;
+  }
+  .panel .body { padding: 12px 14px; }
+
+  .controls .row { margin-bottom: 12px; }
+  .controls label {
+    display: block; font-size: 11px; color: var(--ink-dim);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .controls select, .controls input[type=text] {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--ink); padding: 8px 10px; border-radius: 3px;
+    font-family: inherit; font-size: 13px;
+  }
+  .controls input[type=text]:focus, .controls select:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .controls .chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .chip {
+    border: 1px solid var(--line); padding: 4px 9px; border-radius: 999px;
+    font-size: 11px; color: var(--ink-dim); cursor: pointer; user-select: none;
+    background: var(--panel-2);
+  }
+  .chip:hover { color: var(--ink); border-color: var(--ink-dim); }
+  .chip.on { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  button.action {
+    width: 100%; background: var(--accent); color: var(--bg);
+    border: 0; padding: 10px 12px; border-radius: 3px; font-family: inherit;
+    font-size: 13px; letter-spacing: 0.06em; cursor: pointer; font-weight: 600;
+  }
+  button.action:hover { filter: brightness(1.08); }
+  button.action.secondary {
+    background: var(--panel-2); color: var(--ink); border: 1px solid var(--line);
+    font-weight: normal;
+  }
+  button.action.secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .feed { display: flex; flex-direction: column; gap: 14px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 4px; padding: 16px 18px; position: relative;
+    transition: border-color 0.15s;
+  }
+  .card:hover { border-color: var(--ink-dim); }
+  .card .meta {
+    display: flex; gap: 10px; align-items: center; font-size: 11px;
+    color: var(--ink-dim); letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .card .meta .src { color: var(--accent-3); }
+  .card .meta .badge {
+    border: 1px solid var(--line); padding: 1px 7px; border-radius: 999px;
+    color: var(--ink-dim);
+  }
+  .card .meta .badge.curated { color: var(--accent); border-color: var(--accent); }
+  .card .meta .badge.generated { color: var(--accent-2); border-color: var(--accent-2); }
+  .card .meta .badge.live { color: var(--accent-3); border-color: var(--accent-3); }
+  .card h3 {
+    margin: 0 0 6px; font-size: 16px; line-height: 1.35;
+    color: var(--ink); font-weight: 500;
+  }
+  .card .pair {
+    display: flex; gap: 10px; align-items: center; margin: 10px 0 8px;
+    font-size: 13px;
+  }
+  .card .pair .a, .card .pair .b {
+    background: var(--panel-2); border: 1px solid var(--line);
+    padding: 6px 10px; border-radius: 3px; flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .card .pair .x {
+    color: var(--accent-2); font-weight: bold; padding: 0 4px;
+  }
+  .card .summary {
+    color: var(--ink-dim); font-size: 13px; margin: 8px 0 12px;
+  }
+  .card .strength {
+    height: 6px; background: var(--panel-2); border-radius: 3px;
+    overflow: hidden; margin: 8px 0 12px;
+  }
+  .card .strength > div {
+    height: 100%; background: linear-gradient(90deg, var(--accent-3), var(--accent), var(--accent-2));
+  }
+  .card .strength-label {
+    font-size: 11px; color: var(--ink-dim); letter-spacing: 0.08em;
+    text-transform: uppercase; display: flex; justify-content: space-between;
+    margin-top: -4px; margin-bottom: 8px;
+  }
+  .card .investigate {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;
+  }
+  .card .investigate a {
+    font-size: 11px; color: var(--ink-dim); border: 1px solid var(--line);
+    padding: 4px 9px; border-radius: 3px; letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .card .investigate a:hover {
+    color: var(--accent); border-color: var(--accent); text-decoration: none;
+  }
+
+  .loader {
+    text-align: center; color: var(--ink-dim); padding: 40px 0;
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .loader .dots::after {
+    content: ""; display: inline-block; width: 1em; text-align: left;
+    animation: dots 1.2s steps(4, end) infinite;
+  }
+  @keyframes dots {
+    0% { content: ""; } 25% { content: "."; }
+    50% { content: ".."; } 75% { content: "..."; } 100% { content: ""; }
+  }
+
+  .empty {
+    color: var(--ink-dim); padding: 40px 14px; text-align: center;
+    font-size: 13px;
+  }
+
+  footer {
+    text-align: center; color: var(--ink-dim); font-size: 11px;
+    padding: 30px 22px; letter-spacing: 0.06em;
+    border-top: 1px solid var(--line);
+  }
+  footer a { color: var(--ink-dim); }
+
+  details {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 3px; padding: 8px 10px; margin-top: 10px;
+  }
+  details summary {
+    cursor: pointer; color: var(--ink-dim); font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  details[open] summary { color: var(--accent); margin-bottom: 6px; }
+  details .why {
+    font-size: 13px; color: var(--ink); margin-top: 6px;
+  }
+
+  .pulse {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); margin-right: 6px;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CORR<span class="dot">.</span>AI</h1>
+  <span class="tag">// the unexpected correlation engine</span>
+  <span class="grow"></span>
+  <span class="status"><span class="pulse"></span>signal &middot; <b id="count">0</b> correlations indexed</span>
+</header>
+
+<main>
+  <aside>
+    <section class="panel controls">
+      <h2>Discovery controls</h2>
+      <div class="body">
+        <div class="row">
+          <label for="q">search the index</label>
+          <input id="q" type="text" placeholder="e.g. cheese, weather, Nicolas Cage…" />
+        </div>
+
+        <div class="row">
+          <label>filter by domain</label>
+          <div class="chips" id="domains"></div>
+        </div>
+
+        <div class="row">
+          <label>filter by source</label>
+          <div class="chips" id="sources">
+            <span class="chip on" data-src="curated">curated</span>
+            <span class="chip on" data-src="generated">generated</span>
+            <span class="chip on" data-src="live">live</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="action" id="discover">
+            ▸ Discover new pairings
+          </button>
+        </div>
+        <div class="row">
+          <button class="action secondary" id="reseed">
+            ↻ Reseed feed
+          </button>
+        </div>
+
+        <div class="row" style="margin-top:18px;">
+          <label>how this works</label>
+          <p style="color:var(--ink-dim); font-size:12px; margin:6px 0 0;">
+            CORR.AI surfaces three layers:
+            a <b style="color:var(--accent)">curated</b> archive of famous
+            spurious &amp; unexpected correlations, <b style="color:var(--accent-2)">generated</b>
+            pairings between random concepts, and <b style="color:var(--accent-3)">live</b>
+            random Wikipedia article pairs you can investigate yourself.
+            Use the investigation tools on each card to dig deeper.
+          </p>
+        </div>
+      </div>
+    </section>
+  </aside>
+
+  <section>
+    <div id="feed" class="feed"></div>
+    <div id="loader" class="loader" style="display:none;">
+      ▸ scanning the noise floor<span class="dots"></span>
+    </div>
+  </section>
+</main>
+
+<footer>
+  CORR.AI is a single-file research toy. Correlation ≠ causation. Always investigate.
+  <br/>
+  Curated archive sourced from public datasets (Tyler Vigen's <i>Spurious Correlations</i>,
+  published studies, historical record). Live pairings via the Wikipedia REST API.
+</footer>
+
+<script>
+// =====================================================================
+// CURATED ARCHIVE — real, famous, well-documented odd correlations
+// =====================================================================
+const CURATED = [
+  {
+    title: "US per-capita cheese consumption ↔ deaths by becoming tangled in bedsheets",
+    a: "Mozzarella consumption (US, lbs/person)",
+    b: "Civil engineering doctorates awarded (US)",
+    domains: ["food", "academia", "statistics"],
+    strength: 0.958,
+    summary: "Tyler Vigen's most-cited 'spurious correlation' — r ≈ 0.96 over a decade. A reminder that any two trending time series will eventually shake hands.",
+    why: "Both rose roughly linearly from 2000–2009. The mechanism is independence: there is none. Classic illustration of why p-hacking across thousands of time series guarantees nonsense matches."
+  },
+  {
+    title: "Nicolas Cage film appearances ↔ swimming-pool drownings",
+    a: "Number of films Nicolas Cage appeared in",
+    b: "People who drowned in swimming pools (US, annual)",
+    domains: ["film", "public-health", "statistics"],
+    strength: 0.666,
+    summary: "Cited in nearly every intro statistics course. The correlation is real in the data; the causal link is not.",
+    why: "Vigen 2000–2009. Almost certainly noise — but it's so unsettling that it's become the canonical example of 'be careful what you correlate.'"
+  },
+  {
+    title: "Margarine consumption ↔ divorce rate in Maine",
+    a: "Per-capita margarine consumption (US)",
+    b: "Divorce rate in Maine",
+    domains: ["food", "society", "statistics"],
+    strength: 0.993,
+    summary: "r = 0.99 over 10 years. Both happen to be declining at the same rate.",
+    why: "Margarine fell out of favor as trans-fat concerns spread; Maine's divorce rate dropped for unrelated demographic reasons. Parallel decline = spurious match."
+  },
+  {
+    title: "Stork population ↔ human birth rate (Europe)",
+    a: "Breeding stork pairs in 17 European countries",
+    b: "Annual human birth rate",
+    domains: ["biology", "society", "folklore"],
+    strength: 0.62,
+    summary: "Matthews (2000) showed a statistically significant correlation, r=0.62, between stork populations and human births across European countries.",
+    why: "Confounder: country size. Larger countries have more storks AND more babies. The paper was a deliberate gag with a serious point about lurking variables."
+  },
+  {
+    title: "Ice cream sales ↔ shark attacks",
+    a: "Ice cream sales",
+    b: "Reported shark attacks",
+    domains: ["food", "biology", "weather"],
+    strength: 0.81,
+    summary: "Both spike in summer, neither causes the other. Hot weather → more beachgoers → both more ice cream and more swimmers exposed to sharks.",
+    why: "Textbook confounding variable. Used in nearly every causal inference course."
+  },
+  {
+    title: "Pirate population ↔ global average temperature",
+    a: "Number of pirates worldwide",
+    b: "Global mean surface temperature",
+    domains: ["climate", "history", "satire"],
+    strength: -0.95,
+    summary: "Bobby Henderson's tongue-in-cheek 'proof' that the decline of pirates caused global warming — and the founding text of Pastafarianism.",
+    why: "Satire of climate denial reasoning. Both trends are real over centuries; the implied causality is absurd. Useful for teaching causal fallacies."
+  },
+  {
+    title: "Chocolate consumption ↔ Nobel laureates per capita",
+    a: "Per-capita chocolate consumption by country",
+    b: "Nobel laureates per 10M population",
+    domains: ["food", "academia", "society"],
+    strength: 0.79,
+    summary: "Messerli (2012), NEJM. r = 0.791, p < 0.0001. Switzerland tops both lists.",
+    why: "Confounders galore: GDP, education spending, research infrastructure, latitude. The paper is widely (mis)cited as evidence chocolate boosts cognition."
+  },
+  {
+    title: "Letter frequency in baby names ↔ hurricane names that year",
+    a: "Frequency of starting letters in newborn names",
+    b: "Atlantic hurricane name list (NOAA rotation)",
+    domains: ["language", "weather", "society"],
+    strength: 0.41,
+    summary: "Weak but observable: parents subconsciously copy names they hear in the news. Studied as a 'mere exposure' effect.",
+    why: "Berger et al. (2012) documented exposure-driven name choice. Mechanism is real, though the effect is small."
+  },
+  {
+    title: "Crow funeral attendance ↔ local human funeral activity",
+    a: "Group sizes at crow 'funerals' for dead crows",
+    b: "Nearby human funeral processions",
+    domains: ["biology", "society", "folklore"],
+    strength: 0.34,
+    summary: "Anecdotal but documented in multiple field studies (Swift &amp; Marzluff). Crows may respond to crowds of any species.",
+    why: "Less spurious, more an open biological question. Worth investigating: do corvids cue on human grief behavior?"
+  },
+  {
+    title: "Lemon imports from Mexico ↔ US highway fatality rate",
+    a: "Tons of fresh lemons imported from Mexico",
+    b: "Total US highway fatality rate",
+    domains: ["food", "transport", "statistics"],
+    strength: -0.97,
+    summary: "Stephen Johnson (2008) joke paper, r = -0.97. As lemon imports rose, highway deaths fell.",
+    why: "Used as a warning against reading anything into r-values without a mechanism. Often cited alongside the Nicolas Cage example."
+  },
+  {
+    title: "Sunspot cycle ↔ stock market volatility",
+    a: "11-year solar sunspot cycle",
+    b: "S&amp;P volatility index (long-run)",
+    domains: ["space", "finance", "physics"],
+    strength: 0.28,
+    summary: "Repeatedly investigated, repeatedly inconclusive. Some economists (Jevons, 1875) seriously proposed solar cycles drove business cycles via agriculture.",
+    why: "Jevons' sunspot theory was wrong, but the idea that exogenous cyclical forcings shape markets refuses to die."
+  },
+  {
+    title: "Full moon ↔ ER admissions / crime rates",
+    a: "Lunar phase (full)",
+    b: "Hospital ER admissions and police call volume",
+    domains: ["space", "public-health", "folklore"],
+    strength: 0.04,
+    summary: "Believed almost universally by ER staff. Meta-analyses find essentially zero effect.",
+    why: "Confirmation bias on steroids. Memorable nights get attributed to the moon; quiet full moons don't get logged. Studied to death — effect is ≈0."
+  },
+  {
+    title: "Hat-wearing rates ↔ men's hair density",
+    a: "Daily hat-wearing in adult men (20th c.)",
+    b: "Average male scalp hair density by cohort",
+    domains: ["fashion", "biology", "folklore"],
+    strength: -0.21,
+    summary: "Widely believed (hats cause baldness). Genetics dominates; hat correlation is weak and possibly reverse-causal.",
+    why: "Old wives' tale tested across decades. Hat trends declined; baldness rates didn't move. The folk theory survives anyway."
+  },
+  {
+    title: "Cell-tower density ↔ honeybee colony collapse",
+    a: "Cellular base station density (US, county-level)",
+    b: "Reported colony collapse disorder incidents",
+    domains: ["technology", "biology", "agriculture"],
+    strength: 0.31,
+    summary: "Tabloid favorite. Both correlate with urbanization, agricultural intensity, and surveillance reporting.",
+    why: "Confounded by 'where humans live and farm.' Bees are affected by pesticides, mites, and habitat loss — but the cell-tower theory persists."
+  },
+  {
+    title: "Country flag colors ↔ Olympic medal counts",
+    a: "Number of colors on national flag",
+    b: "All-time Olympic medal count",
+    domains: ["sports", "design", "society"],
+    strength: 0.18,
+    summary: "Weakly positive. Both track with how long a country has existed and its GDP.",
+    why: "Older nations have older flags AND longer Olympic histories. Pure confounding by national age."
+  },
+  {
+    title: "Beer consumption ↔ peer-reviewed papers per scientist",
+    a: "Annual beer consumption (Czech ornithologists, self-reported)",
+    b: "Lifetime publication count",
+    domains: ["academia", "food", "biology"],
+    strength: -0.55,
+    summary: "Grim (2008): the more beer Czech bird researchers drank, the fewer papers they published. r = -0.55, n=34. Negative correlation, real causality unclear.",
+    why: "One of the few 'spurious-sounding' correlations that may have an actual mechanism. Replicated weakly elsewhere."
+  },
+  {
+    title: "Internet Explorer market share ↔ US murder rate",
+    a: "IE browser share (%)",
+    b: "US homicide rate per 100k",
+    domains: ["technology", "society", "statistics"],
+    strength: 0.99,
+    summary: "Both fell together 2006–2011. Reddit's r/dataisbeautiful posterchild.",
+    why: "Two unrelated declining trends. Cited next to Cage/cheese as a warning against time-series correlations without de-trending."
+  },
+  {
+    title: "Day-of-week of birth ↔ baseball batting averages",
+    a: "MLB players' birth day of week",
+    b: "Career batting average (.AVG)",
+    domains: ["sports", "statistics"],
+    strength: 0.06,
+    summary: "Famous in sabermetrics circles for being 'almost something' — never quite reaches significance.",
+    why: "The relative-age effect (birth month) IS real in hockey and soccer. Day-of-week is not. A useful contrast for teaching."
+  },
+  {
+    title: "Twitter sadness words ↔ Dow Jones movement (3 days later)",
+    a: "Fraction of 'sad/anxious' words on public Twitter",
+    b: "DJIA closing price, t+3 days",
+    domains: ["finance", "technology", "language"],
+    strength: 0.87,
+    summary: "Bollen, Mao, Zeng (2011) claimed Twitter mood predicted DJIA at 87% accuracy. Set off a wave of hedge funds buying sentiment feeds.",
+    why: "The original result was hard to replicate out-of-sample. The paper changed the asset management industry anyway."
+  },
+  {
+    title: "Babies born during full moons ↔ folklore vs. record",
+    a: "Births reported during full-moon nights",
+    b: "Actual hospital birth records (40+ million)",
+    domains: ["public-health", "folklore", "space"],
+    strength: 0.00,
+    summary: "Multiple massive studies (Arliss et al. 2005, etc.) show no effect. Belief among labor &amp; delivery nurses remains near-universal.",
+    why: "A correlation that everyone 'knows' exists, that simply does not. The persistence of the belief is the more interesting phenomenon."
+  },
+  {
+    title: "Hours of sunlight ↔ vending machine sales of cold drinks",
+    a: "Sunlight hours, day t",
+    b: "Vending machine cold-drink sales, day t",
+    domains: ["weather", "food", "commerce"],
+    strength: 0.74,
+    summary: "Real causal mechanism — temperature confounding through sunlight. Used in industry forecasting models.",
+    why: "Genuine, exploitable correlation. Not all correlations are spurious; vending route managers use weather forecasts as a sales planning input."
+  },
+  {
+    title: "Surnames ↔ profession (nominative determinism)",
+    a: "Surname phonetics / meaning",
+    b: "Chosen profession",
+    domains: ["language", "psychology", "society"],
+    strength: 0.05,
+    summary: "Pelham et al. (2002): people named Dennis are over-represented among dentists. Tiny effect, frequently re-tested.",
+    why: "Real effect (~5–10% lift), driven by implicit egotism. Replicated across multiple languages and professions."
+  },
+  {
+    title: "Coastline length ↔ ruler resolution (the fractal paradox)",
+    a: "Measured length of Britain's coastline",
+    b: "Size of the ruler used to measure it",
+    domains: ["geography", "math"],
+    strength: -1.0,
+    summary: "Richardson / Mandelbrot. The smaller the ruler, the longer the coastline — without limit. Founding example of fractal geometry.",
+    why: "A 'correlation' that exposes a deeper truth: some 'measurements' have no canonical value. Reframed our notion of dimension."
+  },
+  {
+    title: "Reading 'Anna Karenina' ↔ owning a cat (Goodreads cross-tabulation)",
+    a: "Users who shelved Anna Karenina",
+    b: "Users whose bio mentions a cat",
+    domains: ["literature", "society", "internet"],
+    strength: 0.22,
+    summary: "Surfaces in any large-enough recommendation dataset. Probably mediated by demographics (urban, literary, female-skewed).",
+    why: "Useful illustration of how recommender systems pick up demographic ghosts and call them 'taste.'"
+  },
+  {
+    title: "Country GDP ↔ Eurovision voting blocs",
+    a: "Pairwise GDP-distance",
+    b: "Pairwise Eurovision points exchanged (1998–2024)",
+    domains: ["music", "geopolitics", "society"],
+    strength: 0.41,
+    summary: "Rich neighbors vote for each other; poor neighbors vote for each other. Geographic diaspora effects dominate musical quality.",
+    why: "Quantified by Gatherer, Spierdijk, Yannelis and others. Real, robust, and politically awkward."
+  },
+  {
+    title: "QWERTY-side keyboard ↔ word positivity ratings (the QWERTY effect)",
+    a: "Right-side-of-keyboard letter ratio in a word",
+    b: "Average positivity rating from survey respondents",
+    domains: ["language", "psychology", "technology"],
+    strength: 0.11,
+    summary: "Jasmin &amp; Casasanto (2012): words typed with more right-hand letters are rated more positive. Tiny but replicated in EN, ES, NL.",
+    why: "An honest-to-god causal effect of keyboard layout on emotional language perception. Among the strangest replicated findings in linguistics."
+  },
+  {
+    title: "Earth's rotation slowdown ↔ leap-second adjustments ↔ stock exchange downtime",
+    a: "Atomic-vs-solar time drift",
+    b: "Scheduled leap-second insertions causing finance system crashes",
+    domains: ["space", "technology", "finance"],
+    strength: 0.92,
+    summary: "Every leap second since 1972 has crashed at least one major system. Reddit, LinkedIn, Cloudflare, and others have specific 'leap second incident' postmortems.",
+    why: "A genuinely causal chain from geology → astronomy → infrastructure. The IERS is now phasing leap seconds out (2035) specifically because of this."
+  },
+  {
+    title: "Air pollution (PM2.5) ↔ chess move quality",
+    a: "Ambient PM2.5 in tournament rooms",
+    b: "Engine-evaluated chess move accuracy",
+    domains: ["public-health", "sports", "cognition"],
+    strength: -0.34,
+    summary: "Künn, Palacios &amp; Pestel (2023): a one-SD increase in PM2.5 caused a 26% increase in chess blunder probability among professional players.",
+    why: "Quasi-experimental design across thousands of tournament games. Strongest evidence yet that even moderate air pollution measurably impairs cognition in real time."
+  },
+  {
+    title: "Wikipedia edit volume ↔ political election cycles",
+    a: "Daily Wikipedia edits to politician biographies",
+    b: "Election proximity (days until vote)",
+    domains: ["internet", "politics", "society"],
+    strength: -0.71,
+    summary: "Edits spike sharply in the 4 weeks before any major election. Vandalism and partisan rewriting both spike.",
+    why: "Studied by Steinsson, Greenstein, and the WMF directly. Wikipedia is now a leading indicator of public attention to candidates."
+  },
+];
+
+// =====================================================================
+// DOMAINS for filter chips
+// =====================================================================
+const ALL_DOMAINS = [...new Set(CURATED.flatMap(c => c.domains))].sort();
+
+// =====================================================================
+// GENERATED PAIRINGS — random domain X domain odd hypotheses
+// =====================================================================
+const GENERATOR_TOPICS = [
+  "rainfall in Lagos", "TikTok dance trends", "the Big Mac index",
+  "container ship transit times through the Suez", "honey production in Slovenia",
+  "Bitcoin hashrate", "shark sightings off South Africa", "average cat weight at vet clinics",
+  "births in Iceland", "wine vintages in Bordeaux", "global vinyl LP sales",
+  "Reddit comment length", "average commute time in Tokyo", "espresso prices in Rome",
+  "academic preprints on arXiv", "global flu Google searches", "Antarctic sea ice extent",
+  "Halloween candy purchases", "monarch butterfly migration", "concert ticket prices",
+  "Wikipedia 'on this day' edits", "passport renewal applications",
+  "Spotify track tempo averages", "lottery ticket sales", "marriage rate in South Korea",
+  "average house price per square meter in Berlin", "screen time on iPhones",
+  "fast-food drive-through wait times", "global solar panel installations",
+  "median age of voters", "Olympic record-breakings", "tea consumption in the UK",
+  "global container shipping rates", "Twitter sentiment toward AI",
+  "renewable energy share in Germany", "the price of eggs", "moose collisions in Sweden",
+  "average book-length", "internet outages reported globally", "average IQ scores",
+  "global plastic production", "marathon finish times", "deer-vehicle collisions",
+  "Japanese Sakura bloom dates", "global tea exports", "ice loss in Greenland",
+  "Steam concurrent users", "rate of dog adoption", "median screen brightness at night",
+];
+
+const GENERATOR_TEMPLATES = [
+  { strength: 0.31, summary: "Both have shifted in parallel over the last decade — almost certainly mediated by global wealth or digital infrastructure rollout." },
+  { strength: 0.55, summary: "A weak but persistent correlation; worth checking for a shared confounder (urbanization, climate, demographics)." },
+  { strength: 0.72, summary: "Strong enough to look causal, weak enough to be coincidence. Classic territory for a misleading headline." },
+  { strength: 0.18, summary: "Noisy — but if it holds up after de-trending, the residual signal would be genuinely strange." },
+  { strength: -0.43, summary: "An inverse pattern. Could be a substitution effect, or two declining trends that happen to share a slope." },
+  { strength: 0.61, summary: "Suspicious magnitude. Likely tracks population growth, GDP, or seasonality rather than anything causal." },
+];
+
+function generatePairings(n) {
+  const out = [];
+  const used = new Set();
+  let safety = 0;
+  while (out.length < n && safety++ < n * 6) {
+    const a = GENERATOR_TOPICS[Math.floor(Math.random() * GENERATOR_TOPICS.length)];
+    const b = GENERATOR_TOPICS[Math.floor(Math.random() * GENERATOR_TOPICS.length)];
+    if (a === b) continue;
+    const key = [a, b].sort().join(" :: ");
+    if (used.has(key)) continue;
+    used.add(key);
+    const tpl = GENERATOR_TEMPLATES[Math.floor(Math.random() * GENERATOR_TEMPLATES.length)];
+    out.push({
+      title: `${a} ↔ ${b}`,
+      a, b,
+      domains: ["generated"],
+      strength: tpl.strength + (Math.random() - 0.5) * 0.08,
+      summary: tpl.summary,
+      why: "Hypothetical pairing. No data has been fetched — this is an invitation to investigate. Click the tools below to see if anyone has studied this overlap.",
+      source: "generated",
+    });
+  }
+  return out;
+}
+
+// =====================================================================
+// LIVE — pull random Wikipedia article pairs (CORS-enabled API)
+// =====================================================================
+async function fetchRandomWikiPair() {
+  const url = "https://en.wikipedia.org/api/rest_v1/page/random/summary";
+  const [a, b] = await Promise.all([
+    fetch(url).then(r => r.json()),
+    fetch(url).then(r => r.json()),
+  ]);
+  if (!a.title || !b.title || a.title === b.title) return null;
+  return {
+    title: `${a.title} ↔ ${b.title}`,
+    a: a.title, b: b.title,
+    a_extract: a.extract, b_extract: b.extract,
+    a_url: a.content_urls?.desktop?.page,
+    b_url: b.content_urls?.desktop?.page,
+    domains: ["live"],
+    strength: Math.random() * 0.6 + 0.1,
+    summary: `Two random Wikipedia entities served up for juxtaposition. ${a.extract ? a.extract.slice(0, 140) + "…" : ""}`,
+    why: `${a.title}: ${a.extract || "(no summary)"}\n\n${b.title}: ${b.extract || "(no summary)"}\n\nIs there a hidden link? Investigate.`,
+    source: "live",
+  };
+}
+
+async function fetchLivePairings(n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    try {
+      const p = await fetchRandomWikiPair();
+      if (p) out.push(p);
+    } catch (e) {
+      // network failed — fail quietly, this is best-effort
+    }
+  }
+  return out;
+}
+
+// =====================================================================
+// RENDER
+// =====================================================================
+const state = {
+  feed: [],
+  filterText: "",
+  activeDomains: new Set(ALL_DOMAINS),
+  activeSources: new Set(["curated", "generated", "live"]),
+};
+
+function investigateLinks(item) {
+  const q = (s) => encodeURIComponent(s);
+  const pair = `${item.a} ${item.b}`;
+  return [
+    { label: "Google", href: `https://www.google.com/search?q=${q(pair + " correlation")}` },
+    { label: "Scholar", href: `https://scholar.google.com/scholar?q=${q(pair)}` },
+    { label: "Wikipedia A", href: item.a_url || `https://en.wikipedia.org/wiki/Special:Search?search=${q(item.a)}` },
+    { label: "Wikipedia B", href: item.b_url || `https://en.wikipedia.org/wiki/Special:Search?search=${q(item.b)}` },
+    { label: "Trends", href: `https://trends.google.com/trends/explore?q=${q(item.a)},${q(item.b)}` },
+    { label: "arXiv", href: `https://arxiv.org/search/?query=${q(pair)}&searchtype=all` },
+    { label: "Reddit", href: `https://www.reddit.com/search/?q=${q(pair)}` },
+  ];
+}
+
+function renderCard(item) {
+  const card = document.createElement("article");
+  card.className = "card";
+  const src = item.source || "curated";
+  const strengthPct = Math.min(100, Math.abs(item.strength) * 100).toFixed(0);
+  const sign = item.strength < 0 ? "negative" : "positive";
+  const links = investigateLinks(item);
+
+  card.innerHTML = `
+    <div class="meta">
+      <span class="badge ${src}">${src}</span>
+      <span class="src">${item.domains.filter(d => d !== "generated" && d !== "live").join(" · ") || "—"}</span>
+    </div>
+    <h3>${escapeHtml(item.title)}</h3>
+    <div class="pair">
+      <span class="a" title="${escapeHtml(item.a)}">${escapeHtml(item.a)}</span>
+      <span class="x">↔</span>
+      <span class="b" title="${escapeHtml(item.b)}">${escapeHtml(item.b)}</span>
+    </div>
+    <div class="strength-label">
+      <span>correlation ${sign}</span>
+      <span>r ≈ ${item.strength.toFixed(2)}</span>
+    </div>
+    <div class="strength"><div style="width:${strengthPct}%"></div></div>
+    <div class="summary">${escapeHtml(item.summary)}</div>
+    <details>
+      <summary>why this matters</summary>
+      <div class="why">${escapeHtml(item.why).replace(/\n/g, "<br/>")}</div>
+    </details>
+    <div class="investigate">
+      ${links.map(l => `<a href="${l.href}" target="_blank" rel="noopener noreferrer">${l.label}</a>`).join("")}
+    </div>
+  `;
+  return card;
+}
+
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function applyFilters() {
+  const q = state.filterText.trim().toLowerCase();
+  return state.feed.filter(item => {
+    const src = item.source || "curated";
+    if (!state.activeSources.has(src)) return false;
+    if (src === "curated") {
+      const anyDomain = item.domains.some(d => state.activeDomains.has(d));
+      if (!anyDomain) return false;
+    }
+    if (q) {
+      const hay = `${item.title} ${item.a} ${item.b} ${item.summary} ${item.why} ${item.domains.join(" ")}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function render() {
+  const feedEl = document.getElementById("feed");
+  feedEl.innerHTML = "";
+  const items = applyFilters();
+  document.getElementById("count").textContent = state.feed.length;
+  if (items.length === 0) {
+    feedEl.innerHTML = `<div class="empty">No correlations match your filters.<br/>Try clearing the search or enabling more sources.</div>`;
+    return;
+  }
+  items.forEach(i => feedEl.appendChild(renderCard(i)));
+}
+
+// =====================================================================
+// WIRING
+// =====================================================================
+function buildDomainChips() {
+  const wrap = document.getElementById("domains");
+  ALL_DOMAINS.forEach(d => {
+    const chip = document.createElement("span");
+    chip.className = "chip on";
+    chip.textContent = d;
+    chip.dataset.domain = d;
+    chip.addEventListener("click", () => {
+      chip.classList.toggle("on");
+      if (chip.classList.contains("on")) state.activeDomains.add(d);
+      else state.activeDomains.delete(d);
+      render();
+    });
+    wrap.appendChild(chip);
+  });
+}
+
+function wireSourceChips() {
+  document.querySelectorAll("#sources .chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      chip.classList.toggle("on");
+      const s = chip.dataset.src;
+      if (chip.classList.contains("on")) state.activeSources.add(s);
+      else state.activeSources.delete(s);
+      render();
+    });
+  });
+}
+
+function wireSearch() {
+  document.getElementById("q").addEventListener("input", (e) => {
+    state.filterText = e.target.value;
+    render();
+  });
+}
+
+async function discoverNew() {
+  const btn = document.getElementById("discover");
+  const loader = document.getElementById("loader");
+  btn.disabled = true;
+  loader.style.display = "block";
+  try {
+    const generated = generatePairings(3);
+    generated.forEach(g => state.feed.unshift(g));
+    render();
+    const live = await fetchLivePairings(3);
+    live.forEach(l => state.feed.unshift(l));
+    render();
+  } finally {
+    loader.style.display = "none";
+    btn.disabled = false;
+  }
+}
+
+function reseed() {
+  state.feed = CURATED.map(c => ({ ...c, source: "curated" }));
+  // shuffle in some generated ones up front
+  state.feed = [...generatePairings(4), ...state.feed];
+  render();
+  // and try a couple of live ones in the background
+  fetchLivePairings(2).then(live => {
+    live.forEach(l => state.feed.unshift(l));
+    render();
+  }).catch(() => {});
+}
+
+function init() {
+  buildDomainChips();
+  wireSourceChips();
+  wireSearch();
+  document.getElementById("discover").addEventListener("click", discoverNew);
+  document.getElementById("reseed").addEventListener("click", reseed);
+  reseed();
+}
+
+init();
+</script>
+</body>
+</html>
