@@ -205,6 +205,194 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.4; transform: scale(0.8); }
   }
+
+  /* ----- scan launcher button ----- */
+  .scan-launch {
+    background: var(--accent);
+    color: var(--bg);
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    text-transform: uppercase;
+    transition: filter 0.15s;
+  }
+  .scan-launch:hover { filter: brightness(1.1); }
+  .scan-launch-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--bg); display: inline-block;
+  }
+  .scan-launch.active {
+    background: var(--accent-2); color: var(--ink);
+  }
+  .scan-launch.active .scan-launch-dot {
+    background: var(--ink);
+    animation: pulse 0.7s ease-in-out infinite;
+  }
+
+  /* ----- scan panel ----- */
+  .scan-panel {
+    position: fixed; top: 0; right: 0; height: 100vh;
+    width: 460px; max-width: 100vw;
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    z-index: 30;
+    display: flex; flex-direction: column;
+    box-shadow: -20px 0 50px rgba(0,0,0,0.55);
+  }
+  .scan-panel.open { transform: translateX(0); }
+  .scan-head {
+    padding: 16px 22px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--panel-2);
+  }
+  .scan-title {
+    color: var(--accent);
+    font-size: 12px; letter-spacing: 0.18em; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .scan-title .pulse { background: var(--ink-dim); animation: none; }
+  .scan-panel.scanning .scan-title .pulse {
+    background: var(--accent); animation: pulse 0.8s ease-in-out infinite;
+  }
+  .scan-close {
+    background: transparent; border: 0; color: var(--ink-dim);
+    font-size: 24px; line-height: 1; cursor: pointer; padding: 0 4px;
+  }
+  .scan-close:hover { color: var(--ink); }
+
+  .scan-body {
+    padding: 16px 22px 22px; flex: 1; overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+  .scan-input-row { margin-bottom: 10px; }
+  .scan-input-row label {
+    display: block; font-size: 11px; color: var(--ink-dim);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .scan-input-row input {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--ink); padding: 10px 12px; border-radius: 3px;
+    font-family: inherit; font-size: 13px;
+  }
+  .scan-input-row input:focus { outline: none; border-color: var(--accent); }
+  .scan-go { margin-bottom: 10px; }
+  .scan-go:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .scan-meta {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--ink-dim);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border-top: 1px dashed var(--line);
+    padding-top: 8px; margin-bottom: 14px;
+  }
+  .scan-meta b { color: var(--accent); font-weight: normal; }
+  .scan-panel.scanning .scan-meta b { color: var(--accent-2); }
+
+  .scan-section-label {
+    font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin: 12px 0 6px;
+  }
+
+  .phases {
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 10px 12px;
+    background: var(--bg);
+  }
+  .phase {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; padding: 4px 0;
+    color: var(--ink-dim);
+  }
+  .phase .ph-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--line); flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .phase .ph-label { flex: 1; }
+  .phase.active { color: var(--ink); }
+  .phase.active .ph-dot {
+    background: var(--warn);
+    animation: pulse 0.7s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--warn);
+  }
+  .phase.done { color: var(--accent); }
+  .phase.done .ph-dot { background: var(--accent); box-shadow: 0 0 4px var(--accent); }
+  .phase.error { color: var(--bad); }
+  .phase.error .ph-dot { background: var(--bad); }
+  .phase .ph-meta {
+    margin-left: auto; font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.05em;
+  }
+  .phase.done .ph-meta { color: var(--accent); }
+
+  .scan-log {
+    background: var(--bg); border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-family: ui-monospace, monospace;
+    color: var(--ink-dim);
+    height: 200px; overflow-y: auto;
+  }
+  .scan-log .ln {
+    margin-bottom: 2px;
+    word-break: break-word;
+    line-height: 1.5;
+  }
+  .scan-log .ln .ts {
+    color: var(--line);
+    margin-right: 8px;
+  }
+  .scan-log .ln.good { color: var(--accent); }
+  .scan-log .ln.bad { color: var(--bad); }
+  .scan-log .ln.info { color: var(--accent-3); }
+  .scan-log .ln.dim { color: var(--ink-dim); opacity: 0.75; }
+  .scan-log .ln.emit { color: var(--accent-2); font-weight: bold; }
+  .scan-log .ln.head {
+    color: var(--accent); border-top: 1px dashed var(--line);
+    padding-top: 4px; margin-top: 4px;
+  }
+
+  .scan-stream {
+    background: var(--bg); border: 1px solid var(--line);
+    border-radius: 3px; padding: 8px 10px;
+    max-height: 200px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .scan-stream-empty {
+    color: var(--ink-dim); font-size: 11px;
+    text-align: center; padding: 14px 0;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .stream-item {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-left: 3px solid var(--accent-2);
+    padding: 6px 9px; border-radius: 2px;
+    font-size: 11px;
+    animation: streamIn 0.35s ease;
+  }
+  .stream-item .pair { color: var(--ink); }
+  .stream-item .r { color: var(--accent-2); margin-left: 8px; }
+  @keyframes streamIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* scanned card badge */
+  .card .meta .badge.scanned { color: var(--warn); border-color: var(--warn); }
+
+  @media (max-width: 520px) {
+    .scan-panel { width: 100vw; }
+  }
 </style>
 </head>
 <body>
@@ -214,6 +402,10 @@
   <span class="tag">// the unexpected correlation engine</span>
   <span class="grow"></span>
   <span class="status"><span class="pulse"></span>signal &middot; <b id="count">0</b> correlations indexed</span>
+  <button class="scan-launch" id="scan-launch" title="Open scan terminal">
+    <span class="scan-launch-dot" id="scan-launch-dot"></span>
+    <span>Scan</span>
+  </button>
 </header>
 
 <main>
@@ -237,6 +429,7 @@
             <span class="chip on" data-src="curated">curated</span>
             <span class="chip on" data-src="generated">generated</span>
             <span class="chip on" data-src="live">live</span>
+            <span class="chip on" data-src="scanned">scanned</span>
           </div>
         </div>
 
@@ -261,6 +454,37 @@
     </div>
   </section>
 </main>
+
+<aside id="scan-panel" class="scan-panel" aria-hidden="true">
+  <div class="scan-head">
+    <div class="scan-title"><span class="pulse" id="scan-title-pulse"></span>SCAN TERMINAL</div>
+    <button class="scan-close" id="scan-close" title="Close scan terminal">×</button>
+  </div>
+  <div class="scan-body">
+    <div class="scan-input-row">
+      <label for="scan-input">scan target — word, phrase, or topic</label>
+      <input id="scan-input" type="text" placeholder="e.g. coffee, lunar phases, GPU shortage…" autocomplete="off" />
+    </div>
+    <button class="action scan-go" id="scan-go">▸ Scan public data</button>
+    <div class="scan-meta">
+      <span><b id="scan-state">idle</b></span>
+      <span id="scan-elapsed"></span>
+    </div>
+
+    <div class="scan-status" id="scan-status" style="display:none;">
+      <div class="scan-section-label">▾ pipeline phases</div>
+      <div class="phases" id="scan-phases"></div>
+
+      <div class="scan-section-label">▾ scan log</div>
+      <div class="scan-log" id="scan-log"></div>
+
+      <div class="scan-section-label">▾ stream</div>
+      <div class="scan-stream" id="scan-stream">
+        <div class="scan-stream-empty">no correlations emitted yet</div>
+      </div>
+    </div>
+  </div>
+</aside>
 
 <footer>
   CORR.AI is a single-file research toy. Correlation ≠ causation. Always investigate.
@@ -644,7 +868,7 @@ const state = {
   feed: [],
   filterText: "",
   activeDomains: new Set(ALL_DOMAINS),
-  activeSources: new Set(["curated", "generated", "live"]),
+  activeSources: new Set(["curated", "generated", "live", "scanned"]),
 };
 
 function investigateLinks(item) {
@@ -802,10 +1026,361 @@ function reseed() {
   }).catch(() => {});
 }
 
+// =====================================================================
+// SCAN TERMINAL — real CORS-friendly public-data scan pipeline
+// =====================================================================
+const PHASE_DEFS = [
+  { id: "init",      label: "initializing scan vector" },
+  { id: "wiki",      label: "querying wikipedia opensearch" },
+  { id: "seed",      label: "fetching seed article" },
+  { id: "links",     label: "extracting concept neighbors" },
+  { id: "datamuse",  label: "semantic field via datamuse" },
+  { id: "openlib",   label: "cross-referencing open library" },
+  { id: "random",    label: "sampling noise-floor pairings" },
+  { id: "score",     label: "computing correlation strength" },
+  { id: "emit",      label: "surfacing to feed" },
+];
+
+let scanInProgress = false;
+let scanStartTime = 0;
+let scanElapsedTimer = null;
+
+function buildPhases() {
+  const wrap = document.getElementById("scan-phases");
+  wrap.innerHTML = "";
+  PHASE_DEFS.forEach((p, idx) => {
+    const el = document.createElement("div");
+    el.className = "phase";
+    el.id = `phase-${idx}`;
+    el.innerHTML = `<span class="ph-dot"></span><span class="ph-label">${p.label}</span><span class="ph-meta"></span>`;
+    wrap.appendChild(el);
+  });
+}
+
+function setPhase(idx, status, meta) {
+  const el = document.getElementById(`phase-${idx}`);
+  if (!el) return;
+  el.classList.remove("active", "done", "error");
+  if (status) el.classList.add(status);
+  if (meta !== undefined) el.querySelector(".ph-meta").textContent = meta;
+}
+
+function resetPhases() {
+  PHASE_DEFS.forEach((_, i) => setPhase(i, null, ""));
+}
+
+function logLine(msg, level = "info") {
+  const log = document.getElementById("scan-log");
+  const ln = document.createElement("div");
+  ln.className = `ln ${level}`;
+  const ts = new Date().toTimeString().slice(0, 8);
+  ln.innerHTML = `<span class="ts">${ts}</span>${escapeHtml(msg)}`;
+  log.appendChild(ln);
+  log.scrollTop = log.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById("scan-log").innerHTML = "";
+  const stream = document.getElementById("scan-stream");
+  stream.innerHTML = `<div class="scan-stream-empty">no correlations emitted yet</div>`;
+}
+
+function streamItem(item) {
+  const stream = document.getElementById("scan-stream");
+  const empty = stream.querySelector(".scan-stream-empty");
+  if (empty) empty.remove();
+  const el = document.createElement("div");
+  el.className = "stream-item";
+  el.innerHTML = `<span class="pair">${escapeHtml(item.b)}</span><span class="r">r ≈ ${item.strength.toFixed(2)}</span>`;
+  stream.insertBefore(el, stream.firstChild);
+}
+
+function setScanState(text) {
+  document.getElementById("scan-state").textContent = text;
+}
+
+function startElapsed() {
+  scanStartTime = Date.now();
+  if (scanElapsedTimer) clearInterval(scanElapsedTimer);
+  scanElapsedTimer = setInterval(() => {
+    const ms = Date.now() - scanStartTime;
+    document.getElementById("scan-elapsed").textContent = `t+${(ms/1000).toFixed(1)}s`;
+  }, 100);
+}
+function stopElapsed() {
+  if (scanElapsedTimer) clearInterval(scanElapsedTimer);
+  scanElapsedTimer = null;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickInteresting(pool, n) {
+  const byKind = {};
+  pool.forEach(p => { (byKind[p.kind] = byKind[p.kind] || []).push(p); });
+  Object.values(byKind).forEach(arr => arr.sort((a,b) => b.strength - a.strength));
+  const kinds = Object.keys(byKind);
+  const out = [];
+  let i = 0;
+  while (out.length < n) {
+    let added = false;
+    for (const k of kinds) {
+      const arr = byKind[k];
+      if (i < arr.length) { out.push(arr[i]); added = true; if (out.length >= n) break; }
+    }
+    if (!added) break;
+    i++;
+  }
+  return out.slice(0, n);
+}
+
+async function runScan(rawQuery) {
+  if (scanInProgress) return;
+  const query = (rawQuery || "").trim();
+  if (!query) {
+    logLine("empty query — nothing to scan", "bad");
+    return;
+  }
+
+  scanInProgress = true;
+  const panel = document.getElementById("scan-panel");
+  panel.classList.add("scanning");
+  document.getElementById("scan-launch").classList.add("active");
+  document.getElementById("scan-go").disabled = true;
+  document.getElementById("scan-status").style.display = "block";
+  resetPhases();
+  clearLog();
+  setScanState("active");
+  startElapsed();
+
+  try {
+    logLine(`▸ scan initiated: "${query}"`, "info");
+    logLine(`target hosts: wikipedia.org, datamuse.com, openlibrary.org`, "dim");
+
+    // ---------- PHASE 0: init ----------
+    setPhase(0, "active");
+    await sleep(280);
+    setPhase(0, "done", "✓");
+
+    // ---------- PHASE 1: wiki opensearch ----------
+    setPhase(1, "active");
+    logLine("→ GET en.wikipedia.org/w/api.php?action=opensearch", "dim");
+    let candidates = [];
+    try {
+      const r = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=8&format=json&origin=*`);
+      const data = await r.json();
+      candidates = data[1] || [];
+      logLine(`found ${candidates.length} matching articles`, "good");
+      candidates.slice(0, 4).forEach(t => logLine(`  • ${t}`, "dim"));
+      setPhase(1, "done", `${candidates.length} hits`);
+    } catch (e) {
+      logLine(`wikipedia opensearch failed: ${e.message}`, "bad");
+      setPhase(1, "error", "fail");
+    }
+
+    const seedTitle = candidates[0] || query;
+
+    // ---------- PHASE 2: fetch seed summary ----------
+    setPhase(2, "active");
+    logLine(`fetching summary: ${seedTitle}`, "dim");
+    let seedArticle = null;
+    try {
+      const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(seedTitle)}`);
+      seedArticle = await r.json();
+      if (seedArticle && seedArticle.title) {
+        logLine(`seed locked: ${seedArticle.title}`, "good");
+        if (seedArticle.extract) {
+          logLine(`  excerpt: ${seedArticle.extract.slice(0, 110)}…`, "dim");
+        }
+        setPhase(2, "done", "1 doc");
+      } else {
+        setPhase(2, "error", "miss");
+        logLine("seed article not resolvable", "bad");
+      }
+    } catch (e) {
+      logLine(`seed fetch error: ${e.message}`, "bad");
+      setPhase(2, "error", "fail");
+    }
+
+    // ---------- PHASE 3: outbound links ----------
+    setPhase(3, "active");
+    logLine("extracting outbound concept links…", "dim");
+    let links = [];
+    try {
+      const r = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=links&titles=${encodeURIComponent(seedTitle)}&pllimit=80&format=json&origin=*`);
+      const data = await r.json();
+      const pages = data.query?.pages || {};
+      const first = Object.values(pages)[0];
+      links = (first?.links || [])
+        .map(l => l.title)
+        .filter(t => !t.match(/^(File|Category|Help|Template|Wikipedia|Portal|Module|Draft):/))
+        .filter(t => !/^(List of|Index of|Outline of)/.test(t));
+      logLine(`extracted ${links.length} concept neighbors`, "good");
+      setPhase(3, "done", `${links.length} links`);
+    } catch (e) {
+      logLine(`link extraction error: ${e.message}`, "bad");
+      setPhase(3, "error", "fail");
+    }
+
+    // ---------- PHASE 4: datamuse semantic ----------
+    setPhase(4, "active");
+    logLine("→ GET api.datamuse.com/words?ml=…", "dim");
+    let semantic = [];
+    try {
+      const r = await fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(query)}&max=24`);
+      const data = await r.json();
+      semantic = data.map(d => d.word).filter(Boolean);
+      logLine(`semantic field: ${semantic.length} terms`, "good");
+      if (semantic.length) logLine(`  • ${semantic.slice(0,6).join(", ")}…`, "dim");
+      setPhase(4, "done", `${semantic.length} terms`);
+    } catch (e) {
+      logLine(`datamuse error: ${e.message}`, "bad");
+      setPhase(4, "error", "fail");
+    }
+
+    // ---------- PHASE 5: open library cross-ref ----------
+    setPhase(5, "active");
+    logLine("→ GET openlibrary.org/search.json?q=…", "dim");
+    let books = [];
+    try {
+      const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=5`);
+      const data = await r.json();
+      books = (data.docs || []).map(d => ({
+        title: d.title, author: (d.author_name || [])[0], year: d.first_publish_year
+      })).filter(b => b.title);
+      logLine(`open library: ${books.length} catalog matches`, "good");
+      books.slice(0, 3).forEach(b => logLine(`  ↳ "${b.title}" — ${b.author || "?"}, ${b.year || "?"}`, "dim"));
+      setPhase(5, "done", `${books.length} books`);
+    } catch (e) {
+      logLine(`open library error: ${e.message}`, "bad");
+      setPhase(5, "error", "fail");
+    }
+
+    // ---------- PHASE 6: random samples ----------
+    setPhase(6, "active");
+    logLine("drawing random samples from the noise floor…", "dim");
+    const randoms = [];
+    for (let i = 0; i < 3; i++) {
+      try {
+        const r = await fetch("https://en.wikipedia.org/api/rest_v1/page/random/summary");
+        const d = await r.json();
+        if (d && d.title && d.title !== seedTitle) {
+          randoms.push(d);
+          logLine(`  ↳ random: ${d.title}`, "dim");
+        }
+      } catch (e) { /* skip */ }
+    }
+    logLine(`${randoms.length} random samples drawn`, "good");
+    setPhase(6, "done", `${randoms.length} samples`);
+
+    // ---------- PHASE 7: score ----------
+    setPhase(7, "active");
+    logLine("computing correlation strength heuristics…", "dim");
+
+    const pool = [];
+    shuffle(links).slice(0, 5).forEach(l => {
+      pool.push({ partner: l, kind: "wikipedia link", strength: 0.35 + Math.random() * 0.30 });
+    });
+    shuffle(semantic).slice(0, 4).forEach(w => {
+      pool.push({ partner: w, kind: "semantic associate", strength: 0.45 + Math.random() * 0.35 });
+    });
+    randoms.forEach(c => {
+      pool.push({
+        partner: c.title, kind: "random juxtaposition",
+        strength: 0.10 + Math.random() * 0.40,
+        extract: c.extract, url: c.content_urls?.desktop?.page,
+      });
+    });
+    books.slice(0, 2).forEach(b => {
+      pool.push({
+        partner: b.title, kind: "open library catalog",
+        strength: 0.25 + Math.random() * 0.30,
+        extract: `${b.author ? "by " + b.author : ""}${b.year ? " (" + b.year + ")" : ""}`,
+      });
+    });
+
+    logLine(`scored ${pool.length} candidates`, "good");
+    setPhase(7, "done", `${pool.length} scored`);
+
+    // ---------- PHASE 8: emit ----------
+    setPhase(8, "active");
+    logLine("▸ surfacing discovered correlations…", "head");
+    const chosen = pickInteresting(pool, Math.min(7, pool.length));
+    let emitted = 0;
+    for (const c of chosen) {
+      await sleep(420);
+      const item = {
+        title: `${seedArticle?.title || query} ↔ ${c.partner}`,
+        a: seedArticle?.title || query,
+        b: c.partner,
+        domains: ["scanned"],
+        strength: c.strength,
+        summary: `Surfaced via ${c.kind} during scan of "${query}". ${c.extract ? c.extract.slice(0, 130) + "…" : "Use the investigation tools below to test whether this pairing has empirical basis."}`,
+        why: `Scan query: "${query}"\nPairing kind: ${c.kind}\nHeuristic r ≈ ${c.strength.toFixed(2)}\n\n${c.extract || "No extract available — this is an invitation, not a verdict. Run the investigation links below to see what real research exists."}`,
+        source: "scanned",
+        a_url: seedArticle?.content_urls?.desktop?.page,
+        b_url: c.url,
+      };
+      state.feed.unshift(item);
+      render();
+      streamItem(item);
+      logLine(`▸ EMIT: ${c.partner} (r≈${c.strength.toFixed(2)}, via ${c.kind})`, "emit");
+      emitted++;
+    }
+    setPhase(8, "done", `${emitted} emitted`);
+
+    logLine(`scan complete — ${emitted} correlations added to feed`, "good");
+  } catch (e) {
+    logLine(`fatal scan error: ${e.message}`, "bad");
+  } finally {
+    scanInProgress = false;
+    stopElapsed();
+    setScanState("idle");
+    document.getElementById("scan-launch").classList.remove("active");
+    document.getElementById("scan-go").disabled = false;
+    document.getElementById("scan-panel").classList.remove("scanning");
+  }
+}
+
+function wireScan() {
+  buildPhases();
+  const panel = document.getElementById("scan-panel");
+  document.getElementById("scan-launch").addEventListener("click", () => {
+    panel.classList.add("open");
+    panel.setAttribute("aria-hidden", "false");
+    setTimeout(() => document.getElementById("scan-input").focus(), 280);
+  });
+  document.getElementById("scan-close").addEventListener("click", () => {
+    panel.classList.remove("open");
+    panel.setAttribute("aria-hidden", "true");
+  });
+  document.getElementById("scan-go").addEventListener("click", () => {
+    runScan(document.getElementById("scan-input").value);
+  });
+  document.getElementById("scan-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") runScan(e.target.value);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && panel.classList.contains("open")) {
+      panel.classList.remove("open");
+      panel.setAttribute("aria-hidden", "true");
+    }
+  });
+}
+
 function init() {
   buildDomainChips();
   wireSourceChips();
   wireSearch();
+  wireScan();
   document.getElementById("discover").addEventListener("click", discoverNew);
   document.getElementById("reseed").addEventListener("click", reseed);
   reseed();
