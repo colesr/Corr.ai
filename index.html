@@ -193,6 +193,29 @@
   .card .investigate a:hover {
     color: var(--accent); border-color: var(--accent); text-decoration: none;
   }
+  .card .read-btn {
+    font-family: inherit; font-size: 11px;
+    background: var(--accent); color: var(--bg);
+    border: 1px solid var(--accent);
+    padding: 4px 11px; border-radius: 3px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    font-weight: 600; cursor: pointer;
+    transition: filter 0.15s;
+  }
+  .card .read-btn:hover { filter: brightness(1.1); }
+  .card.removing {
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    pointer-events: none;
+  }
+  .card.fresh {
+    animation: cardIn 0.4s ease;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
   .loader {
     text-align: center; color: var(--ink-dim); padding: 40px 0;
@@ -924,6 +947,11 @@ function investigateLinks(item) {
 function renderCard(item) {
   const card = document.createElement("article");
   card.className = "card";
+  card.dataset.cardId = item.id;
+  if (item._fresh) {
+    card.classList.add("fresh");
+    delete item._fresh;
+  }
   const src = item.source || "curated";
   const strengthPct = Math.min(100, Math.abs(item.strength) * 100).toFixed(0);
   const sign = item.strength < 0 ? "negative" : "positive";
@@ -932,7 +960,7 @@ function renderCard(item) {
   card.innerHTML = `
     <div class="meta">
       <span class="badge ${src}">${src}</span>
-      <span class="src">${item.domains.filter(d => d !== "generated" && d !== "live").join(" · ") || "—"}</span>
+      <span class="src">${item.domains.filter(d => d !== "generated" && d !== "live" && d !== "scanned").join(" · ") || "—"}</span>
     </div>
     <h3>${escapeHtml(item.title)}</h3>
     <div class="pair">
@@ -951,6 +979,7 @@ function renderCard(item) {
       <div class="why">${escapeHtml(item.why).replace(/\n/g, "<br/>")}</div>
     </details>
     <div class="investigate">
+      <button class="read-btn" data-action="read" data-id="${item.id}" title="Mark as read &amp; load a fresh correlation">▸ Read</button>
       ${links.map(l => `<a href="${l.href}" target="_blank" rel="noopener noreferrer">${l.label}</a>`).join("")}
     </div>
   `;
@@ -1015,7 +1044,38 @@ function updateCount() {
   }
 }
 
+let _idCounter = 0;
+function newId() { return `c${Date.now().toString(36)}_${++_idCounter}`; }
+function ensureIds() {
+  state.feed.forEach(i => { if (!i.id) i.id = newId(); });
+}
+
+function readCard(id) {
+  const cardEl = document.querySelector(`[data-card-id="${id}"]`);
+  const idx = state.feed.findIndex(i => i.id === id);
+  if (idx === -1) return;
+  if (cardEl) cardEl.classList.add("removing");
+  setTimeout(() => {
+    state.feed.splice(idx, 1);
+    const replacement = generatePairings(1)[0];
+    if (replacement) {
+      replacement.id = newId();
+      replacement._fresh = true;
+      state.feed.push(replacement);
+    }
+    render();
+    // 30% chance: also pull a live Wikipedia random pair in the background
+    if (Math.random() < 0.3) {
+      fetchLivePairings(1).then(items => {
+        items.forEach(i => { i.id = newId(); i._fresh = true; state.feed.push(i); });
+        render();
+      }).catch(() => {});
+    }
+  }, 280);
+}
+
 function render() {
+  ensureIds();
   const feedEl = document.getElementById("feed");
   feedEl.innerHTML = "";
   const items = applyFilters();
@@ -1446,11 +1506,21 @@ function wireScan() {
   });
 }
 
+function wireFeedActions() {
+  document.getElementById("feed").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action='read']");
+    if (!btn) return;
+    e.preventDefault();
+    readCard(btn.dataset.id);
+  });
+}
+
 function init() {
   buildDomainChips();
   wireSourceChips();
   wireSearch();
   wireScan();
+  wireFeedActions();
   document.getElementById("discover").addEventListener("click", discoverNew);
   document.getElementById("reseed").addEventListener("click", reseed);
   reseed();
