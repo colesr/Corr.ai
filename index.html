@@ -119,6 +119,73 @@
   }
   .chip:hover { color: var(--ink); border-color: var(--ink-dim); }
   .chip.on { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+  /* ----- domain cloud (sized by frequency) ----- */
+  .domain-cloud {
+    display: flex; flex-wrap: wrap; gap: 6px 6px;
+    align-items: center; justify-content: flex-start;
+    padding: 6px 0 2px;
+    line-height: 1.2;
+  }
+  .domain-bubble {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    border-radius: 999px;
+    cursor: pointer; user-select: none;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: transform 0.22s cubic-bezier(.2,.9,.3,1.3),
+                background 0.22s ease,
+                border-color 0.22s ease,
+                color 0.22s ease,
+                box-shadow 0.28s ease,
+                opacity 0.22s ease;
+    position: relative;
+    transform-origin: center;
+    opacity: 0.9;
+  }
+  .domain-bubble:hover {
+    transform: translateY(-1px) scale(1.06);
+    color: var(--ink);
+    border-color: var(--ink-dim);
+    opacity: 1;
+    z-index: 2;
+  }
+  .domain-bubble.on {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    opacity: 1;
+  }
+  .domain-bubble.on:hover {
+    color: var(--bg);
+    box-shadow: 0 4px 16px rgba(214, 255, 92, 0.32);
+  }
+  .domain-bubble:not(.on) {
+    opacity: 0.55;
+  }
+  .domain-bubble:not(.on):hover { opacity: 0.9; }
+  .domain-bubble.pop { animation: bubblePop 0.42s cubic-bezier(.3,.9,.3,1.3); }
+  .domain-bubble.dim { animation: bubbleDim 0.32s ease-out; }
+  @keyframes bubblePop {
+    0%   { transform: scale(1); }
+    38%  { transform: scale(1.22); }
+    65%  { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+  @keyframes bubbleDim {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(0.88); }
+    100% { transform: scale(1); }
+  }
+  .domain-cloud-meta {
+    font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-top: 8px; opacity: 0.65;
+    display: flex; justify-content: space-between;
+  }
+  .domain-cloud-meta b { color: var(--accent); font-weight: normal; }
   button.action {
     width: 100%; background: var(--accent); color: var(--bg);
     border: 0; padding: 10px 12px; border-radius: 3px; font-family: inherit;
@@ -131,7 +198,51 @@
   }
   button.action.secondary:hover { border-color: var(--accent); color: var(--accent); }
 
-  .feed { display: flex; flex-direction: column; gap: 14px; }
+  .feed {
+    display: flex; flex-direction: column; gap: 14px;
+    position: relative;
+  }
+  .feed::before {
+    content: "";
+    position: absolute;
+    top: -3px; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      var(--accent-3) 30%,
+      var(--accent) 50%,
+      var(--accent-3) 70%,
+      transparent 100%);
+    background-size: 35% 100%;
+    background-repeat: no-repeat;
+    background-position: -40% 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .feed.loading::before {
+    animation: feedSweep 0.78s cubic-bezier(.4,0,.6,1);
+  }
+  @keyframes feedSweep {
+    0%   { background-position: -40% 0; opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { background-position: 140% 0; opacity: 0; }
+  }
+  .card.entering {
+    animation: cardEnter 0.36s ease-out backwards;
+  }
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .feed.loading .empty {
+    animation: pulseLoad 0.78s ease;
+  }
+  @keyframes pulseLoad {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
   .card {
     background: var(--panel); border: 1px solid var(--line);
     border-radius: 4px; padding: 16px 18px; position: relative;
@@ -1077,6 +1188,14 @@ function readCard(id) {
 function render() {
   ensureIds();
   const feedEl = document.getElementById("feed");
+
+  // trigger scan-line sweep across the top of the feed area
+  feedEl.classList.remove("loading");
+  void feedEl.offsetWidth;
+  feedEl.classList.add("loading");
+  clearTimeout(feedEl._sweepTimer);
+  feedEl._sweepTimer = setTimeout(() => feedEl.classList.remove("loading"), 800);
+
   feedEl.innerHTML = "";
   const items = applyFilters();
   updateCount();
@@ -1084,27 +1203,87 @@ function render() {
     feedEl.innerHTML = `<div class="empty">No correlations match your filters.<br/>Try clearing the search or enabling more sources.</div>`;
     return;
   }
-  items.forEach(i => feedEl.appendChild(renderCard(i)));
+  items.forEach((i, idx) => {
+    const card = renderCard(i);
+    card.classList.add("entering");
+    card.style.animationDelay = `${Math.min(idx * 22, 260)}ms`;
+    feedEl.appendChild(card);
+  });
 }
 
 // =====================================================================
 // WIRING
 // =====================================================================
-function buildDomainChips() {
+function computeDomainFreq() {
+  const freq = {};
+  CURATED.forEach(c => c.domains.forEach(d => {
+    freq[d] = (freq[d] || 0) + 1;
+  }));
+  return freq;
+}
+
+function buildDomainCloud() {
   const wrap = document.getElementById("domains");
-  ALL_DOMAINS.forEach(d => {
-    const chip = document.createElement("span");
-    chip.className = "chip on";
-    chip.textContent = d;
-    chip.dataset.domain = d;
-    chip.addEventListener("click", () => {
-      chip.classList.toggle("on");
-      if (chip.classList.contains("on")) state.activeDomains.add(d);
-      else state.activeDomains.delete(d);
+  wrap.className = "domain-cloud";
+  wrap.innerHTML = "";
+
+  const freq = computeDomainFreq();
+  const values = Object.values(freq);
+  const minF = Math.min(...values);
+  const maxF = Math.max(...values);
+  const range = (maxF - minF) || 1;
+
+  // Sort by frequency desc, then interleave for a cloud-like layout
+  // so the biggest bubbles aren't all clustered together
+  const sorted = [...ALL_DOMAINS].sort((a, b) => freq[b] - freq[a]);
+  const interleaved = [];
+  const mid = Math.ceil(sorted.length / 2);
+  for (let i = 0; i < mid; i++) {
+    interleaved.push(sorted[i]);
+    if (sorted[i + mid]) interleaved.push(sorted[i + mid]);
+  }
+
+  interleaved.forEach((d, i) => {
+    const f = freq[d];
+    const ratio = (f - minF) / range; // 0..1
+    const fontSize = 10.5 + ratio * 10;          // 10.5 → 20.5 px
+    const padX     = 9 + ratio * 7;              // 9 → 16 px
+    const padY     = 3 + ratio * 3.5;            // 3 → 6.5 px
+
+    const bubble = document.createElement("span");
+    bubble.className = "domain-bubble on";
+    bubble.dataset.domain = d;
+    bubble.textContent = d;
+    bubble.style.fontSize = `${fontSize.toFixed(1)}px`;
+    bubble.style.padding  = `${padY.toFixed(1)}px ${padX.toFixed(1)}px`;
+    bubble.title = `${d} — ${f} curated entr${f === 1 ? "y" : "ies"}`;
+
+    // entrance stagger
+    bubble.style.animation = `cardEnter 0.35s ease-out ${Math.min(i * 14, 350)}ms backwards`;
+
+    bubble.addEventListener("click", () => {
+      bubble.classList.remove("pop", "dim");
+      void bubble.offsetWidth;
+      if (bubble.classList.contains("on")) {
+        bubble.classList.remove("on");
+        bubble.classList.add("dim");
+        state.activeDomains.delete(d);
+      } else {
+        bubble.classList.add("on");
+        bubble.classList.add("pop");
+        state.activeDomains.add(d);
+      }
       render();
     });
-    wrap.appendChild(chip);
+
+    wrap.appendChild(bubble);
   });
+
+  // meta row showing what the sizes mean
+  const meta = document.createElement("div");
+  meta.className = "domain-cloud-meta";
+  meta.innerHTML = `<span>size = frequency</span><span><b>${ALL_DOMAINS.length}</b> domains</span>`;
+  wrap.appendChild(meta);
 }
 
 function wireSourceChips() {
@@ -1516,7 +1695,7 @@ function wireFeedActions() {
 }
 
 function init() {
-  buildDomainChips();
+  buildDomainCloud();
   wireSourceChips();
   wireSearch();
   wireScan();
