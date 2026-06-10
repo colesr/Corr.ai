@@ -154,6 +154,34 @@
   .chip:hover { color: var(--ink); border-color: var(--ink-dim); }
   .chip.on { color: var(--bg); background: var(--accent); border-color: var(--accent); }
 
+  /* button styled to match the chips/filters above it */
+  .action-chip {
+    border: 1px solid var(--line);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    color: var(--ink-dim);
+    background: var(--panel-2);
+    cursor: pointer;
+    user-select: none;
+    font-family: inherit;
+    letter-spacing: 0.06em;
+    transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  }
+  .action-chip:hover {
+    color: var(--ink);
+    border-color: var(--ink-dim);
+  }
+  .action-chip:active {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .action-chip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   /* ----- domain cloud (sized by frequency) ----- */
   .domain-cloud {
     display: flex; flex-wrap: wrap; gap: 6px 6px;
@@ -438,6 +466,15 @@
     background: var(--ink);
     animation: pulse 0.7s ease-in-out infinite;
   }
+  /* AI scan button — sits next to User scan; different accent color */
+  .scan-launch.ai {
+    background: var(--accent-3);
+    color: var(--bg);
+    margin-left: 6px;
+  }
+  .scan-launch.ai.active {
+    background: var(--accent-2); color: var(--ink);
+  }
 
   /* ----- scan panel ----- */
   .scan-panel {
@@ -593,6 +630,38 @@
 
   /* scanned card badge */
   .card .meta .badge.scanned { color: var(--warn); border-color: var(--warn); }
+
+  /* AI scan transparency disclosure blocks */
+  .ai-disclose {
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--bg);
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+  .ai-disclose summary {
+    cursor: pointer;
+    padding: 7px 11px;
+    color: var(--accent-3);
+    letter-spacing: 0.06em;
+    user-select: none;
+    list-style: none;
+  }
+  .ai-disclose summary::-webkit-details-marker { display: none; }
+  .ai-disclose summary::before { content: "▸ "; color: var(--ink-dim); }
+  .ai-disclose[open] summary::before { content: "▾ "; }
+  .ai-disclose summary:hover { color: var(--accent); }
+  .ai-disclose pre {
+    margin: 0; padding: 8px 11px 11px;
+    color: var(--ink-dim);
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border-top: 1px dashed var(--line);
+    max-height: 220px;
+    overflow-y: auto;
+  }
 
   @media (max-width: 520px) {
     .scan-panel { width: 100vw; }
@@ -1495,9 +1564,13 @@
   </button>
   <span class="grow"></span>
   <span class="status"><span class="pulse"></span>online &middot; <b id="count">0</b> correlations indexed</span>
-  <button class="scan-launch" id="scan-launch" title="Open scan terminal">
+  <button class="scan-launch" id="scan-launch" title="Open user scan terminal">
     <span class="scan-launch-dot" id="scan-launch-dot"></span>
-    <span>Scan</span>
+    <span>User scan</span>
+  </button>
+  <button class="scan-launch ai" id="ai-scan-launch" title="Open AI scan terminal — Llama-generated correlations with a full audit trail">
+    <span class="scan-launch-dot" id="ai-scan-launch-dot"></span>
+    <span>AI scan</span>
   </button>
 </header>
 
@@ -1527,18 +1600,8 @@
         </div>
 
         <div class="row">
-          <button class="action" id="discover">
-            ▸ Discover new pairings
-          </button>
-        </div>
-        <div class="row">
-          <button class="action" id="generate-ai" title="Generate a fresh correlation with Llama 3.1 (free via Cloudflare Workers AI)">
-            ✸ Generate with AI
-          </button>
-        </div>
-        <div class="row">
-          <button class="action secondary" id="reseed">
-            ↻ Reseed feed
+          <button class="action-chip" id="reseed" title="Reload the feed with curated + freshly generated pairings">
+            ↻ Reload feed
           </button>
         </div>
       </div>
@@ -1580,7 +1643,7 @@
 
 <aside id="scan-panel" class="scan-panel" aria-hidden="true">
   <div class="scan-head">
-    <div class="scan-title"><span class="pulse" id="scan-title-pulse"></span>SCAN TERMINAL</div>
+    <div class="scan-title"><span class="pulse" id="scan-title-pulse"></span>USER SCAN TERMINAL</div>
     <button class="scan-close" id="scan-close" title="Close scan terminal">×</button>
   </div>
   <div class="scan-body">
@@ -1605,6 +1668,55 @@
       <div class="scan-stream" id="scan-stream">
         <div class="scan-stream-empty">no correlations emitted yet</div>
       </div>
+    </div>
+  </div>
+</aside>
+
+<aside id="ai-scan-panel" class="scan-panel" aria-hidden="true">
+  <div class="scan-head">
+    <div class="scan-title"><span class="pulse" id="ai-scan-title-pulse"></span>AI SCAN TERMINAL</div>
+    <button class="scan-close" id="ai-scan-close" title="Close AI scan terminal">×</button>
+  </div>
+  <div class="scan-body">
+    <div class="scan-input-row">
+      <label for="ai-scan-input">seed (optional) — topic, domain, or angle</label>
+      <input id="ai-scan-input" type="text" placeholder="e.g. urban beekeeping, train delays, sleep…" autocomplete="off" />
+    </div>
+    <button class="action scan-go" id="ai-scan-go">✸ Generate via AI</button>
+    <div class="scan-meta">
+      <span><b id="ai-scan-state">idle</b></span>
+      <span id="ai-scan-elapsed"></span>
+    </div>
+
+    <div class="scan-status" id="ai-scan-status" style="display:none;">
+      <div class="scan-section-label">▾ pipeline phases</div>
+      <div class="phases" id="ai-scan-phases"></div>
+
+      <div class="scan-section-label">▾ ai scan log</div>
+      <div class="scan-log" id="ai-scan-log"></div>
+
+      <div class="scan-section-label">▾ emitted</div>
+      <div class="scan-stream" id="ai-scan-stream">
+        <div class="scan-stream-empty">no correlations emitted yet</div>
+      </div>
+
+      <div class="scan-section-label">▾ transparency · what the model saw</div>
+      <details class="ai-disclose" id="ai-prompt-disclose">
+        <summary>system prompt</summary>
+        <pre id="ai-prompt-system"></pre>
+      </details>
+      <details class="ai-disclose">
+        <summary>user prompt</summary>
+        <pre id="ai-prompt-user"></pre>
+      </details>
+      <details class="ai-disclose">
+        <summary>raw model output (pre-parse)</summary>
+        <pre id="ai-prompt-raw"></pre>
+      </details>
+      <details class="ai-disclose">
+        <summary>parsed correlation (post-validate)</summary>
+        <pre id="ai-prompt-parsed"></pre>
+      </details>
     </div>
   </div>
 </aside>
@@ -3806,54 +3918,246 @@ function wireSearch() {
   });
 }
 
-async function discoverNew() {
-  const btn = document.getElementById("discover");
-  const loader = document.getElementById("loader");
-  btn.disabled = true;
-  loader.style.display = "block";
-  try {
-    const generated = generatePairings(3);
-    generated.forEach(g => state.feed.unshift(g));
-    render();
-    const live = await fetchLivePairings(3);
-    live.forEach(l => state.feed.unshift(l));
-    render();
-  } finally {
-    loader.style.display = "none";
-    btn.disabled = false;
-  }
+// =====================================================================
+// AI SCAN — drives /api/generate (Cloudflare Workers AI · Llama 3.1 8B)
+// and surfaces every step in its own scan terminal so the user can audit
+// the prompt, the raw model output, and the validated card before it
+// lands in the feed.
+// =====================================================================
+const AI_PHASE_DEFS = [
+  { id: "init",     label: "initializing ai request" },
+  { id: "prompt",   label: "constructing system + user prompt" },
+  { id: "dispatch", label: "POST /api/generate → cloudflare workers ai" },
+  { id: "model",    label: "llama-3.1-8b-instruct inference" },
+  { id: "parse",    label: "parsing model output as JSON" },
+  { id: "validate", label: "validating fields + clamping strength" },
+  { id: "emit",     label: "surfacing to feed" },
+];
+
+let aiScanInProgress = false;
+let aiScanStartTime = 0;
+let aiScanElapsedTimer = null;
+
+function aiBuildPhases() {
+  const wrap = document.getElementById("ai-scan-phases");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  AI_PHASE_DEFS.forEach((p, idx) => {
+    const el = document.createElement("div");
+    el.className = "phase";
+    el.id = `ai-phase-${idx}`;
+    el.innerHTML = `<span class="ph-dot"></span><span class="ph-label">${p.label}</span><span class="ph-meta"></span>`;
+    wrap.appendChild(el);
+  });
 }
 
-async function generateAI() {
-  const btn = document.getElementById("generate-ai");
-  const loader = document.getElementById("loader");
-  const originalLabel = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = "✸ Generating…";
-  loader.style.display = "block";
+function aiSetPhase(idx, status, meta) {
+  const el = document.getElementById(`ai-phase-${idx}`);
+  if (!el) return;
+  el.classList.remove("active", "done", "error");
+  if (status) el.classList.add(status);
+  if (meta !== undefined) el.querySelector(".ph-meta").textContent = meta;
+}
+
+function aiResetPhases() {
+  AI_PHASE_DEFS.forEach((_, i) => aiSetPhase(i, null, ""));
+}
+
+function aiLogLine(msg, level = "info") {
+  const log = document.getElementById("ai-scan-log");
+  if (!log) return;
+  const ln = document.createElement("div");
+  ln.className = `ln ${level}`;
+  const ts = new Date().toTimeString().slice(0, 8);
+  ln.innerHTML = `<span class="ts">${ts}</span>${escapeHtml(msg)}`;
+  log.appendChild(ln);
+  log.scrollTop = log.scrollHeight;
+}
+
+function aiClearLog() {
+  document.getElementById("ai-scan-log").innerHTML = "";
+  const stream = document.getElementById("ai-scan-stream");
+  stream.innerHTML = `<div class="scan-stream-empty">no correlations emitted yet</div>`;
+  ["ai-prompt-system", "ai-prompt-user", "ai-prompt-raw", "ai-prompt-parsed"]
+    .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ""; });
+}
+
+function aiStreamItem(item) {
+  const stream = document.getElementById("ai-scan-stream");
+  const empty = stream.querySelector(".scan-stream-empty");
+  if (empty) empty.remove();
+  const el = document.createElement("div");
+  el.className = "stream-item";
+  el.innerHTML = `<span class="pair">${escapeHtml(item.title)}</span><span class="r">r ≈ ${item.strength.toFixed(2)}</span>`;
+  stream.insertBefore(el, stream.firstChild);
+}
+
+function aiSetState(text) {
+  document.getElementById("ai-scan-state").textContent = text;
+}
+
+function aiStartElapsed() {
+  aiScanStartTime = Date.now();
+  if (aiScanElapsedTimer) clearInterval(aiScanElapsedTimer);
+  aiScanElapsedTimer = setInterval(() => {
+    const ms = Date.now() - aiScanStartTime;
+    document.getElementById("ai-scan-elapsed").textContent = `t+${(ms/1000).toFixed(1)}s`;
+  }, 100);
+}
+function aiStopElapsed() {
+  if (aiScanElapsedTimer) clearInterval(aiScanElapsedTimer);
+  aiScanElapsedTimer = null;
+}
+
+async function runAIScan(rawSeed) {
+  if (aiScanInProgress) return;
+  const seed = (rawSeed || "").trim();
+
+  aiScanInProgress = true;
+  const panel = document.getElementById("ai-scan-panel");
+  panel.classList.add("scanning");
+  document.getElementById("ai-scan-launch").classList.add("active");
+  document.getElementById("ai-scan-go").disabled = true;
+  document.getElementById("ai-scan-status").style.display = "block";
+  aiResetPhases();
+  aiClearLog();
+  aiSetState("active");
+  aiStartElapsed();
+
   try {
+    aiLogLine(seed ? `▸ ai scan initiated · seed: "${seed}"` : "▸ ai scan initiated (no seed)", "info");
+    aiLogLine("target: cloudflare workers ai · @cf/meta/llama-3.1-8b-instruct", "dim");
+
+    // PHASE 0 — init
+    aiSetPhase(0, "active");
+    await sleep(160);
+    aiSetPhase(0, "done", "✓");
+
+    // PHASE 1 — prompt
+    aiSetPhase(1, "active");
+    aiLogLine("building system + user prompt", "dim");
+    await sleep(140);
+    aiSetPhase(1, "done", "✓");
+
+    // PHASE 2 — dispatch
+    aiSetPhase(2, "active");
+    aiLogLine("→ POST /api/generate", "dim");
+    const reqStart = performance.now();
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ seed }),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      console.warn("[ai] generate failed", data);
-      toast(data.error || "AI generation failed", "warn");
-      return;
+    const reqMs = performance.now() - reqStart;
+    aiSetPhase(2, "done", `${reqMs.toFixed(0)} ms`);
+
+    // PHASE 3 — model inference
+    aiSetPhase(3, "active");
+    let data = null;
+    try { data = await res.json(); } catch (e) {
+      aiSetPhase(3, "error", "no json");
+      aiLogLine(`response body was not JSON: ${e.message}`, "bad");
+      throw e;
     }
-    state.feed.unshift(data);
+
+    // Surface the prompts the server constructed (transparency).
+    if (data?.prompt) {
+      const sys = document.getElementById("ai-prompt-system");
+      const usr = document.getElementById("ai-prompt-user");
+      if (sys) sys.textContent = data.prompt.system || "";
+      if (usr) usr.textContent = data.prompt.user || "";
+    }
+    if (typeof data?.raw === "string") {
+      const rawEl = document.getElementById("ai-prompt-raw");
+      if (rawEl) rawEl.textContent = data.raw;
+    }
+
+    if (!res.ok) {
+      aiSetPhase(3, "error", "fail");
+      aiLogLine(`✖ ${data?.error || "model call failed"}`, "bad");
+      throw new Error(data?.error || `HTTP ${res.status}`);
+    }
+
+    const modelMs = data?.durationMs ?? null;
+    aiSetPhase(3, "done", modelMs != null ? `${modelMs} ms` : "✓");
+    if (data?.model) aiLogLine(`model · ${data.model}`, "dim");
+    if (modelMs != null) aiLogLine(`server-side inference: ${modelMs} ms`, "dim");
+    if (typeof data?.raw === "string") {
+      aiLogLine(`raw output · ${data.raw.length} chars (see transparency panel)`, "dim");
+    }
+
+    // PHASE 4 — parse
+    aiSetPhase(4, "active");
+    const card = data.card;
+    if (!card || typeof card !== "object") {
+      aiSetPhase(4, "error", "no card");
+      aiLogLine("server returned no card payload", "bad");
+      throw new Error("no card");
+    }
+    aiSetPhase(4, "done", "✓");
+    aiLogLine("JSON parsed successfully", "good");
+
+    // PHASE 5 — validate
+    aiSetPhase(5, "active");
+    await sleep(140);
+    aiSetPhase(5, "done", `r=${(card.strength ?? 0).toFixed(2)}`);
+    aiLogLine(`fields · title · a · b · domains[${(card.domains||[]).length}] · strength · summary · why`, "dim");
+
+    const parsedEl = document.getElementById("ai-prompt-parsed");
+    if (parsedEl) parsedEl.textContent = JSON.stringify(card, null, 2);
+
+    // PHASE 6 — emit
+    aiSetPhase(6, "active");
+    card.id = newId();
+    card._fresh = true;
+    state.feed.unshift(card);
     render();
-    toast(`✸ ${data.title}`);
+    aiStreamItem(card);
+    aiSetPhase(6, "done", "✓");
+    aiLogLine(`▸ EMIT: ${card.title} (r≈${card.strength.toFixed(2)})`, "emit");
+    aiLogLine("card prepended to feed — investigate via the action toolbar", "head");
+
+    aiSetState("complete");
   } catch (e) {
-    console.warn("[ai] generate error", e);
-    toast("AI generation failed — see console", "warn");
+    console.warn("[ai-scan] failed", e);
+    aiSetState("error");
+    aiLogLine(`fatal: ${e.message || e}`, "bad");
+    toast(`AI scan failed: ${e.message || "see log"}`, "warn");
   } finally {
-    loader.style.display = "none";
-    btn.disabled = false;
-    btn.textContent = originalLabel;
+    aiStopElapsed();
+    document.getElementById("ai-scan-launch").classList.remove("active");
+    document.getElementById("ai-scan-go").disabled = false;
+    panel.classList.remove("scanning");
+    aiScanInProgress = false;
   }
+}
+
+function wireAIScan() {
+  aiBuildPhases();
+  const panel = document.getElementById("ai-scan-panel");
+  document.getElementById("ai-scan-launch").addEventListener("click", () => {
+    const userPanel = document.getElementById("scan-panel");
+    if (userPanel) { userPanel.classList.remove("open"); userPanel.setAttribute("aria-hidden", "true"); }
+    panel.classList.add("open");
+    panel.setAttribute("aria-hidden", "false");
+    setTimeout(() => document.getElementById("ai-scan-input").focus(), 280);
+  });
+  document.getElementById("ai-scan-close").addEventListener("click", () => {
+    panel.classList.remove("open");
+    panel.setAttribute("aria-hidden", "true");
+  });
+  document.getElementById("ai-scan-go").addEventListener("click", () => {
+    runAIScan(document.getElementById("ai-scan-input").value);
+  });
+  document.getElementById("ai-scan-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") runAIScan(e.target.value);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && panel.classList.contains("open")) {
+      panel.classList.remove("open");
+      panel.setAttribute("aria-hidden", "true");
+    }
+  });
 }
 
 function reseed() {
@@ -4765,6 +5069,8 @@ function wireScan() {
   buildPhases();
   const panel = document.getElementById("scan-panel");
   document.getElementById("scan-launch").addEventListener("click", () => {
+    const aiPanel = document.getElementById("ai-scan-panel");
+    if (aiPanel) { aiPanel.classList.remove("open"); aiPanel.setAttribute("aria-hidden", "true"); }
     panel.classList.add("open");
     panel.setAttribute("aria-hidden", "false");
     setTimeout(() => document.getElementById("scan-input").focus(), 280);
@@ -4838,12 +5144,11 @@ async function init() {
   wireSourceChips();
   wireSearch();
   wireScan();
+  wireAIScan();
   wireFeedActions();
   wireCanvas();
   renderFavoritesList();
   renderScansList();
-  document.getElementById("discover").addEventListener("click", discoverNew);
-  document.getElementById("generate-ai").addEventListener("click", generateAI);
   document.getElementById("reseed").addEventListener("click", reseed);
   reseed();
 

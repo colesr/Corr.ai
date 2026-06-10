@@ -1,6 +1,10 @@
 // Cloudflare Pages Function — POST /api/generate
 // Calls Workers AI to produce one unexpected correlation as JSON.
 // Requires an AI binding named "AI" in the Pages project settings.
+// Returns the parsed card plus transparency metadata (raw model output,
+// prompts, model name, timings) so the client can render an audit trail.
+
+const MODEL = "@cf/meta/llama-3.1-8b-instruct";
 
 export async function onRequest({ request, env }) {
   if (request.method !== "POST") {
@@ -40,8 +44,9 @@ Rules:
     ? `Generate a correlation using this seed for inspiration: "${seed}"`
     : `Generate one unexpected correlation right now. Surprise me.`;
 
+  const startedAt = Date.now();
   try {
-    const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
+    const result = await env.AI.run(MODEL, {
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
@@ -49,10 +54,20 @@ Rules:
       max_tokens: 500,
       temperature: 0.95,
     });
+    const durationMs = Date.now() - startedAt;
 
     const raw = String(result?.response || "").trim();
     const parsed = extractJson(raw);
-    if (!parsed) return json({ error: "model returned non-JSON", raw }, 502);
+
+    if (!parsed) {
+      return json({
+        error: "model returned non-JSON",
+        raw,
+        model: MODEL,
+        durationMs,
+        prompt: { system, user },
+      }, 502);
+    }
 
     // Light validation + defaults so the client can render unconditionally.
     parsed.source = "generated";
@@ -65,9 +80,20 @@ Rules:
     parsed.summary = String(parsed.summary || "");
     parsed.why     = String(parsed.why     || "");
 
-    return json(parsed);
+    return json({
+      card: parsed,
+      model: MODEL,
+      durationMs,
+      prompt: { system, user },
+      raw,
+    });
   } catch (e) {
-    return json({ error: e?.message || "AI call failed" }, 502);
+    return json({
+      error: e?.message || "AI call failed",
+      model: MODEL,
+      durationMs: Date.now() - startedAt,
+      prompt: { system, user },
+    }, 502);
   }
 }
 
