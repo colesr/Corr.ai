@@ -1532,6 +1532,11 @@
           </button>
         </div>
         <div class="row">
+          <button class="action" id="generate-ai" title="Generate a fresh correlation with Llama 3.1 (free via Cloudflare Workers AI)">
+            ✸ Generate with AI
+          </button>
+        </div>
+        <div class="row">
           <button class="action secondary" id="reseed">
             ↻ Reseed feed
           </button>
@@ -3819,6 +3824,38 @@ async function discoverNew() {
   }
 }
 
+async function generateAI() {
+  const btn = document.getElementById("generate-ai");
+  const loader = document.getElementById("loader");
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "✸ Generating…";
+  loader.style.display = "block";
+  try {
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      console.warn("[ai] generate failed", data);
+      toast(data.error || "AI generation failed", "warn");
+      return;
+    }
+    state.feed.unshift(data);
+    render();
+    toast(`✸ ${data.title}`);
+  } catch (e) {
+    console.warn("[ai] generate error", e);
+    toast("AI generation failed — see console", "warn");
+  } finally {
+    loader.style.display = "none";
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
 function reseed() {
   state.feed = CURATED.map(c => ({ ...c, source: "curated" }));
   // shuffle in some generated ones up front
@@ -4806,6 +4843,7 @@ async function init() {
   renderFavoritesList();
   renderScansList();
   document.getElementById("discover").addEventListener("click", discoverNew);
+  document.getElementById("generate-ai").addEventListener("click", generateAI);
   document.getElementById("reseed").addEventListener("click", reseed);
   reseed();
 
