@@ -563,6 +563,396 @@
   @media (max-width: 520px) {
     .scan-panel { width: 100vw; }
   }
+
+  /* ===== header auth + canvas buttons ===== */
+  .header-btn {
+    background: var(--panel-2);
+    color: var(--ink-dim);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+    text-transform: uppercase;
+    transition: all 0.18s;
+  }
+  .header-btn:hover {
+    color: var(--ink); border-color: var(--ink-dim);
+  }
+  .header-btn-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink-dim); display: inline-block;
+  }
+  .header-btn.authed {
+    color: var(--accent); border-color: var(--accent);
+  }
+  .header-btn.authed .header-btn-dot {
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .canvas-btn {
+    color: var(--accent-3) !important;
+    border-color: var(--accent-3) !important;
+  }
+  .canvas-btn .header-btn-dot { background: var(--accent-3); }
+  .canvas-btn:hover { background: rgba(106,209,255,0.08); }
+
+  /* ===== card top-right action toolbar ===== */
+  .card .card-actions {
+    position: absolute;
+    top: 12px; right: 14px;
+    display: flex; gap: 4px;
+    z-index: 1;
+  }
+  .card-action {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    width: 26px; height: 26px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+    font-family: inherit;
+    padding: 0;
+  }
+  .card-action:hover {
+    border-color: var(--ink-dim);
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
+  .card-action.fav.active { color: var(--accent); border-color: var(--accent); }
+  .card-action.fav.active:hover { background: rgba(214,255,92,0.08); }
+  .card-action.like.active { color: var(--accent-3); border-color: var(--accent-3); }
+  .card-action.like.active:hover { background: rgba(106,209,255,0.08); }
+  .card-action.dislike.active { color: var(--bad); border-color: var(--bad); }
+  .card-action.dislike.active:hover { background: rgba(255,92,122,0.08); }
+  .card-action.canvas:hover { color: var(--accent-3); border-color: var(--accent-3); }
+  .card-action.locked { opacity: 0.45; cursor: not-allowed; }
+  .card-action.locked::after {
+    content: "·";
+    position: absolute; top: -2px; right: -2px;
+    width: 8px; height: 8px;
+    background: var(--bg); border-radius: 50%;
+    font-size: 8px; color: var(--ink-dim);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-action.pop { animation: bubblePop 0.4s cubic-bezier(.3,.9,.3,1.3); }
+
+  /* leave space so the h3 doesn't run into the actions */
+  .card h3 { padding-right: 130px; }
+
+  /* ===== modal (auth) ===== */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(8, 9, 11, 0.78);
+    backdrop-filter: blur(6px);
+    z-index: 50;
+    display: none;
+    align-items: center; justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-backdrop.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    width: 380px; max-width: calc(100vw - 32px);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    overflow: hidden;
+    animation: modalIn 0.28s cubic-bezier(.2,.9,.3,1.1);
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-head {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--panel-2);
+  }
+  .modal-title {
+    color: var(--accent); font-size: 12px;
+    letter-spacing: 0.16em; font-weight: 600;
+  }
+  .modal-close {
+    background: transparent; border: 0; color: var(--ink-dim);
+    font-size: 22px; cursor: pointer; padding: 0 4px; line-height: 1;
+  }
+  .modal-close:hover { color: var(--ink); }
+  .modal-body { padding: 22px; }
+  .modal-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+  .modal-tab {
+    flex: 1; background: transparent; border: 0;
+    color: var(--ink-dim);
+    padding: 8px 10px;
+    font-family: inherit; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.18s;
+  }
+  .modal-tab:hover { color: var(--ink); }
+  .modal-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .modal-field { margin-bottom: 12px; }
+  .modal-field label {
+    display: block; font-size: 11px; color: var(--ink-dim);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px;
+  }
+  .modal-field input {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--ink); padding: 9px 11px; border-radius: 3px;
+    font-family: inherit; font-size: 13px;
+  }
+  .modal-field input:focus { outline: none; border-color: var(--accent); }
+  .modal-err {
+    color: var(--bad); font-size: 11px; margin-bottom: 10px;
+    min-height: 14px;
+  }
+  .modal-submit {
+    width: 100%; background: var(--accent); color: var(--bg);
+    border: 0; padding: 10px 12px; border-radius: 3px;
+    font-family: inherit; font-size: 12px;
+    letter-spacing: 0.08em; font-weight: 600;
+    cursor: pointer; text-transform: uppercase;
+  }
+  .modal-submit:hover { filter: brightness(1.1); }
+  .modal-anon {
+    margin-top: 14px;
+    width: 100%; background: transparent; color: var(--ink-dim);
+    border: 1px dashed var(--line);
+    padding: 9px 12px; border-radius: 3px;
+    font-family: inherit; font-size: 11px;
+    letter-spacing: 0.08em; cursor: pointer;
+    text-transform: uppercase;
+  }
+  .modal-anon:hover { color: var(--ink); border-color: var(--ink-dim); }
+  .modal-note {
+    color: var(--ink-dim); font-size: 11px; margin-top: 12px;
+    line-height: 1.5;
+  }
+  .modal-user {
+    background: var(--panel-2); border: 1px solid var(--line);
+    padding: 14px; border-radius: 3px; margin-bottom: 14px;
+  }
+  .modal-user .uname { color: var(--accent); font-weight: 600; }
+  .modal-user .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-top: 10px; font-size: 11px;
+    color: var(--ink-dim); letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .modal-user .stats div b {
+    display: block; font-size: 18px; color: var(--ink);
+    margin-bottom: 2px; font-weight: 600;
+  }
+
+  /* ===== canvas panel (full-screen) ===== */
+  .canvas-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 40;
+    display: none;
+    flex-direction: column;
+  }
+  .canvas-overlay.open { display: flex; animation: fadeIn 0.22s ease; }
+  .canvas-head {
+    border-bottom: 1px solid var(--line);
+    padding: 14px 22px;
+    display: flex; align-items: center; gap: 18px;
+    background: var(--panel);
+  }
+  .canvas-head h2 {
+    margin: 0; font-size: 13px; color: var(--accent);
+    letter-spacing: 0.16em; font-weight: 600;
+  }
+  .canvas-head .grow { flex: 1; }
+  .canvas-toolbar {
+    display: flex; gap: 4px; flex-wrap: wrap;
+  }
+  .canvas-tool {
+    background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--ink-dim);
+    font-family: inherit; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 11px; border-radius: 3px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .canvas-tool:hover { color: var(--ink); border-color: var(--ink-dim); }
+  .canvas-tool.active {
+    color: var(--bg); background: var(--accent);
+    border-color: var(--accent);
+  }
+  .canvas-tool.danger:hover { color: var(--bad); border-color: var(--bad); }
+  .canvas-close {
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink-dim); padding: 6px 12px;
+    border-radius: 3px; font-family: inherit; font-size: 11px;
+    cursor: pointer; letter-spacing: 0.08em;
+  }
+  .canvas-close:hover { color: var(--ink); border-color: var(--ink-dim); }
+  .canvas-workspace {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .canvas-workspace.panning { cursor: grabbing; }
+  .canvas-workspace.tool-connect { cursor: crosshair; }
+  .canvas-workspace.tool-add-node,
+  .canvas-workspace.tool-add-note { cursor: copy; }
+  .canvas-workspace.tool-delete { cursor: not-allowed; }
+  .canvas-board {
+    position: absolute; top: 0; left: 0;
+    transform-origin: 0 0;
+    width: 100%; height: 100%;
+  }
+  .canvas-edges {
+    position: absolute; top: 0; left: 0;
+    width: 8000px; height: 6000px;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .canvas-edges path {
+    fill: none;
+    stroke: var(--accent-3);
+    stroke-width: 1.5;
+    opacity: 0.7;
+    pointer-events: stroke;
+  }
+  .canvas-edges path.hover, .canvas-edges path:hover {
+    stroke: var(--accent-2); stroke-width: 2.5; opacity: 1;
+    cursor: pointer;
+  }
+  .canvas-node {
+    position: absolute;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px 12px;
+    min-width: 140px; max-width: 260px;
+    color: var(--ink);
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .canvas-node.dragging { cursor: grabbing; opacity: 0.85; z-index: 10; }
+  .canvas-node:hover {
+    border-color: var(--ink-dim);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  }
+  .canvas-node.connect-source {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(214,255,92,0.3);
+  }
+  .canvas-node .node-title {
+    font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .canvas-node .node-text {
+    word-wrap: break-word;
+  }
+  .canvas-node[contenteditable="true"] {
+    cursor: text;
+    border-color: var(--accent);
+    outline: none;
+  }
+  .canvas-node.kind-note {
+    background: rgba(255, 180, 84, 0.08);
+    border-color: rgba(255, 180, 84, 0.4);
+  }
+  .canvas-node.kind-correlation {
+    border-color: var(--accent-3);
+    background: var(--panel-2);
+  }
+  .canvas-node.kind-correlation .node-title { color: var(--accent-3); }
+  .canvas-node.kind-decision {
+    background: rgba(106, 209, 255, 0.08);
+    border-color: rgba(106, 209, 255, 0.4);
+    border-radius: 14px;
+  }
+  .canvas-empty {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--ink-dim);
+    font-size: 13px; letter-spacing: 0.06em;
+    text-align: center;
+    pointer-events: none;
+  }
+  .canvas-empty b { color: var(--accent); font-weight: normal; }
+  .canvas-meta {
+    position: absolute; bottom: 12px; left: 12px;
+    color: var(--ink-dim); font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: rgba(20, 22, 27, 0.85);
+    padding: 5px 10px; border-radius: 3px;
+    border: 1px solid var(--line);
+    pointer-events: none;
+  }
+  .canvas-meta-inline {
+    color: var(--ink-dim); font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .canvas-help {
+    position: absolute; bottom: 12px; right: 12px;
+    color: var(--ink-dim); font-size: 10px;
+    letter-spacing: 0.06em;
+    background: rgba(20, 22, 27, 0.85);
+    padding: 6px 12px; border-radius: 3px;
+    border: 1px solid var(--line);
+    line-height: 1.7;
+  }
+  .canvas-help b { color: var(--accent); font-weight: normal; }
+
+  /* tiny toast */
+  .toast-tray {
+    position: fixed; bottom: 20px; right: 20px;
+    z-index: 100;
+    display: flex; flex-direction: column; gap: 6px;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    border-left-width: 3px;
+    color: var(--ink);
+    padding: 8px 14px;
+    border-radius: 3px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.4s forwards;
+    pointer-events: auto;
+  }
+  .toast.warn { border-color: var(--warn); }
+  .toast.bad { border-color: var(--bad); }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateX(20px); }
+  }
 </style>
 </head>
 <body>
@@ -570,6 +960,14 @@
 <header>
   <h1>CORR<span class="dot">.</span>AI</h1>
   <span class="tag">// the unexpected correlation engine</span>
+  <button class="header-btn auth-btn" id="auth-btn" title="Sign in to unlock favorites & canvas">
+    <span class="header-btn-dot" id="auth-btn-dot"></span>
+    <span id="auth-btn-label">Log in</span>
+  </button>
+  <button class="header-btn canvas-btn" id="canvas-btn" style="display:none;" title="Open the smart canvas">
+    <span class="header-btn-dot"></span>
+    <span>Canvas</span>
+  </button>
   <span class="grow"></span>
   <span class="status"><span class="pulse"></span>online &middot; <b id="count">0</b> correlations indexed</span>
   <button class="scan-launch" id="scan-launch" title="Open scan terminal">
@@ -655,6 +1053,50 @@
     </div>
   </div>
 </aside>
+
+<div class="modal-backdrop" id="auth-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="auth-modal-title">SIGN IN</div>
+      <button class="modal-close" id="auth-modal-close">×</button>
+    </div>
+    <div class="modal-body" id="auth-modal-body"></div>
+  </div>
+</div>
+
+<div class="canvas-overlay" id="canvas-overlay">
+  <div class="canvas-head">
+    <h2>▸ SMART CANVAS</h2>
+    <div class="canvas-toolbar">
+      <button class="canvas-tool active" data-tool="select" title="Select / drag nodes (V)">▸ Select</button>
+      <button class="canvas-tool" data-tool="add-node" title="Click empty space to add a node (N)">＋ Node</button>
+      <button class="canvas-tool" data-tool="add-note" title="Click empty space to add a note (S)">＋ Note</button>
+      <button class="canvas-tool" data-tool="add-decision" title="Click empty space to add a decision (D)">＋ Decision</button>
+      <button class="canvas-tool" data-tool="connect" title="Click source node, then target (C)">↝ Connect</button>
+      <button class="canvas-tool danger" data-tool="delete" title="Click an item to delete it (X)">× Delete</button>
+      <button class="canvas-tool danger" id="canvas-clear" title="Clear the entire canvas">⌫ Clear</button>
+    </div>
+    <span class="grow"></span>
+    <span class="canvas-meta-inline" id="canvas-meta-inline"></span>
+    <button class="canvas-close" id="canvas-close">× Close</button>
+  </div>
+  <div class="canvas-workspace" id="canvas-workspace">
+    <div class="canvas-board" id="canvas-board">
+      <svg class="canvas-edges" id="canvas-edges"></svg>
+    </div>
+    <div class="canvas-empty" id="canvas-empty">
+      <b>your smart canvas is empty</b><br/>
+      pick a tool above and click to place a node,<br/>
+      or use <b>Add to Canvas</b> ⊞ on any correlation card.
+    </div>
+    <div class="canvas-help">
+      <b>scroll</b> to zoom · <b>drag</b> empty space to pan<br/>
+      <b>double-click</b> a node to edit · <b>esc</b> to deselect tool
+    </div>
+  </div>
+</div>
+
+<div class="toast-tray" id="toast-tray"></div>
 
 <footer>
   CORR.AI is a single-file research toy. Correlation ≠ causation. Always investigate.
@@ -1067,8 +1509,18 @@ function renderCard(item) {
   const strengthPct = Math.min(100, Math.abs(item.strength) * 100).toFixed(0);
   const sign = item.strength < 0 ? "negative" : "positive";
   const links = investigateLinks(item);
+  const favActive = isLoggedIn() && isFavorited(item);
+  const rxn = getReaction(item);
+  const favLockClass = isLoggedIn() ? "" : " locked";
+  const canvasLockClass = isLoggedIn() ? "" : " locked";
 
   card.innerHTML = `
+    <div class="card-actions">
+      <button class="card-action fav${favActive ? " active" : ""}${favLockClass}" data-action="favorite" data-id="${item.id}" title="${isLoggedIn() ? "Favorite this correlation" : "Sign in to favorite"}">★</button>
+      <button class="card-action like${rxn === "like" ? " active" : ""}" data-action="like" data-id="${item.id}" title="Like — feed will favor similar topics">▲</button>
+      <button class="card-action dislike${rxn === "dislike" ? " active" : ""}" data-action="dislike" data-id="${item.id}" title="Dislike — feed will avoid similar topics">▼</button>
+      <button class="card-action canvas${canvasLockClass}" data-action="add-canvas" data-id="${item.id}" title="${isLoggedIn() ? "Add to Smart Canvas" : "Sign in to use Canvas"}">⊞</button>
+    </div>
     <div class="meta">
       <span class="badge ${src}">${src}</span>
       <span class="src">${item.domains.filter(d => d !== "generated" && d !== "live" && d !== "scanned").join(" · ") || "—"}</span>
@@ -1120,7 +1572,13 @@ function applyFilters() {
       }
       return true;
     })
-    .sort((a, b) => Math.abs(b.strength) - Math.abs(a.strength));
+    .sort((a, b) => {
+      // base relevance is |r|; add a bounded preference nudge so liked
+      // domains float up and disliked ones sink, without overpowering r
+      const sa = Math.abs(a.strength) + 0.15 * Math.tanh(preferenceScore(a) / 5);
+      const sb = Math.abs(b.strength) + 0.15 * Math.tanh(preferenceScore(b) / 5);
+      return sb - sa;
+    });
 }
 
 function updateCount() {
@@ -1159,6 +1617,604 @@ let _idCounter = 0;
 function newId() { return `c${Date.now().toString(36)}_${++_idCounter}`; }
 function ensureIds() {
   state.feed.forEach(i => { if (!i.id) i.id = newId(); });
+}
+
+// =====================================================================
+// AUTH (localStorage only — there is no backend; passwords are stored
+// in plaintext locally. This is honest about the standalone-file
+// constraint and clearly stated to the user in the modal note.)
+// =====================================================================
+const AUTH = {
+  user: null,     // { username } when signed in, null when anon/logged out
+  anonymous: false,
+};
+
+function loadAuth() {
+  try {
+    const raw = localStorage.getItem("corr.ai:session");
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s.username) AUTH.user = { username: s.username };
+      if (s.anonymous) AUTH.anonymous = true;
+    }
+  } catch (e) {}
+}
+function saveAuth() {
+  localStorage.setItem("corr.ai:session", JSON.stringify({
+    username: AUTH.user?.username || null,
+    anonymous: AUTH.anonymous,
+  }));
+}
+function getCredsMap() {
+  try { return JSON.parse(localStorage.getItem("corr.ai:creds") || "{}"); }
+  catch { return {}; }
+}
+function saveCredsMap(m) {
+  localStorage.setItem("corr.ai:creds", JSON.stringify(m));
+}
+function isLoggedIn() { return !!AUTH.user; }
+
+function updateAuthUI() {
+  const btn = document.getElementById("auth-btn");
+  const label = document.getElementById("auth-btn-label");
+  const canvasBtn = document.getElementById("canvas-btn");
+  if (AUTH.user) {
+    btn.classList.add("authed");
+    label.textContent = `▸ ${AUTH.user.username}`;
+    btn.title = "Account · click to view or sign out";
+    canvasBtn.style.display = "inline-flex";
+  } else {
+    btn.classList.remove("authed");
+    label.textContent = AUTH.anonymous ? "Anonymous" : "Log in";
+    btn.title = "Sign in to unlock favorites & canvas";
+    canvasBtn.style.display = "none";
+  }
+}
+
+function openAuthModal() {
+  const modal = document.getElementById("auth-modal");
+  const body = document.getElementById("auth-modal-body");
+  const title = document.getElementById("auth-modal-title");
+  modal.classList.add("open");
+  if (AUTH.user) renderAccountPanel(body, title);
+  else renderAuthForm(body, title, "login");
+}
+function closeAuthModal() {
+  document.getElementById("auth-modal").classList.remove("open");
+}
+
+function renderAuthForm(body, title, mode) {
+  title.textContent = mode === "register" ? "CREATE ACCOUNT" : "SIGN IN";
+  body.innerHTML = `
+    <div class="modal-tabs">
+      <button class="modal-tab ${mode === "login" ? "active" : ""}" data-mode="login">Sign in</button>
+      <button class="modal-tab ${mode === "register" ? "active" : ""}" data-mode="register">Create</button>
+    </div>
+    <div class="modal-field">
+      <label>username</label>
+      <input id="auth-user" type="text" autocomplete="username" />
+    </div>
+    <div class="modal-field">
+      <label>password</label>
+      <input id="auth-pass" type="password" autocomplete="${mode === "register" ? "new-password" : "current-password"}" />
+    </div>
+    <div class="modal-err" id="auth-err"></div>
+    <button class="modal-submit" id="auth-submit">
+      ${mode === "register" ? "▸ Create account" : "▸ Sign in"}
+    </button>
+    <button class="modal-anon" id="auth-anon">▸ Continue anonymously</button>
+    <p class="modal-note">
+      Anonymous mode keeps you in the feed and lets you Like / Dislike,
+      but Favorites and the Smart Canvas need an account so your work
+      persists across sessions.
+      <br/><br/>
+      <span style="opacity:0.7">Note: this is a single-file app. Credentials are
+      stored in your browser's localStorage only — there is no server.</span>
+    </p>
+  `;
+  setTimeout(() => document.getElementById("auth-user").focus(), 100);
+  body.querySelectorAll(".modal-tab").forEach(t => {
+    t.addEventListener("click", () => renderAuthForm(body, title, t.dataset.mode));
+  });
+  document.getElementById("auth-submit").addEventListener("click", () => attemptAuth(mode));
+  document.getElementById("auth-pass").addEventListener("keydown", e => {
+    if (e.key === "Enter") attemptAuth(mode);
+  });
+  document.getElementById("auth-anon").addEventListener("click", () => {
+    AUTH.user = null;
+    AUTH.anonymous = true;
+    saveAuth();
+    updateAuthUI();
+    closeAuthModal();
+    toast("Browsing anonymously — favorites won't persist", "warn");
+  });
+}
+
+function attemptAuth(mode) {
+  const u = document.getElementById("auth-user").value.trim();
+  const p = document.getElementById("auth-pass").value;
+  const err = document.getElementById("auth-err");
+  if (!u || !p) { err.textContent = "username and password required"; return; }
+  if (u.length < 2) { err.textContent = "username must be ≥ 2 chars"; return; }
+  if (p.length < 4) { err.textContent = "password must be ≥ 4 chars"; return; }
+  const creds = getCredsMap();
+  if (mode === "register") {
+    if (creds[u]) { err.textContent = "username already exists"; return; }
+    creds[u] = p;
+    saveCredsMap(creds);
+    AUTH.user = { username: u }; AUTH.anonymous = false;
+    saveAuth(); updateAuthUI(); closeAuthModal();
+    toast(`Account "${u}" created — welcome.`);
+    render();
+  } else {
+    if (!creds[u]) { err.textContent = "no such account"; return; }
+    if (creds[u] !== p) { err.textContent = "incorrect password"; return; }
+    AUTH.user = { username: u }; AUTH.anonymous = false;
+    saveAuth(); updateAuthUI(); closeAuthModal();
+    toast(`Signed in as ${u}`);
+    render();
+  }
+}
+
+function renderAccountPanel(body, title) {
+  title.textContent = "ACCOUNT";
+  const favs = loadFavorites();
+  const rxns = loadReactions();
+  const likedCount = Object.values(rxns).filter(v => v === "like").length;
+  let canvasCount = 0;
+  try {
+    const raw = localStorage.getItem(userKey("canvas"));
+    if (raw) canvasCount = (JSON.parse(raw).nodes || []).length;
+  } catch {}
+  body.innerHTML = `
+    <div class="modal-user">
+      <div>signed in as <span class="uname">${escapeHtml(AUTH.user.username)}</span></div>
+      <div class="stats">
+        <div><b>${favs.length}</b>favorites</div>
+        <div><b>${likedCount}</b>liked</div>
+        <div><b>${canvasCount}</b>on canvas</div>
+      </div>
+    </div>
+    <button class="modal-submit" id="auth-logout">▸ Sign out</button>
+    <button class="modal-anon" id="auth-anon">▸ Continue anonymously</button>
+    <p class="modal-note">
+      Signing out keeps your favorites and canvas saved locally — sign back
+      in with the same username and password to restore them.
+    </p>
+  `;
+  document.getElementById("auth-logout").addEventListener("click", () => {
+    AUTH.user = null; AUTH.anonymous = false;
+    saveAuth(); updateAuthUI(); closeAuthModal();
+    toast("Signed out");
+    render();
+    closeCanvas();
+  });
+  document.getElementById("auth-anon").addEventListener("click", () => {
+    AUTH.user = null; AUTH.anonymous = true;
+    saveAuth(); updateAuthUI(); closeAuthModal();
+    toast("Browsing anonymously", "warn");
+    render();
+    closeCanvas();
+  });
+}
+
+// =====================================================================
+// FAVORITES + PREFERENCES (per-user, in localStorage)
+// =====================================================================
+function userKey(suffix) {
+  const u = AUTH.user?.username || "_anon_";
+  return `corr.ai:${u}:${suffix}`;
+}
+function loadFavorites() {
+  try { return JSON.parse(localStorage.getItem(userKey("favs")) || "[]"); }
+  catch { return []; }
+}
+function saveFavorites(arr) { localStorage.setItem(userKey("favs"), JSON.stringify(arr)); }
+
+function loadPreferences() {
+  try { return JSON.parse(localStorage.getItem(userKey("prefs")) || "{}"); }
+  catch { return {}; }
+}
+function savePreferences(p) { localStorage.setItem(userKey("prefs"), JSON.stringify(p)); }
+
+// Like/Dislike state per card title (so it persists across reseeds)
+function loadReactions() {
+  try { return JSON.parse(localStorage.getItem(userKey("rxns")) || "{}"); }
+  catch { return {}; }
+}
+function saveReactions(r) { localStorage.setItem(userKey("rxns"), JSON.stringify(r)); }
+
+function preferenceScore(item) {
+  const prefs = loadPreferences();
+  const domainScore = (item.domains || []).reduce(
+    (s, d) => s + (prefs[d] || 0), 0
+  );
+  return domainScore;
+}
+
+function isFavorited(item) {
+  return loadFavorites().some(f => f.title === item.title);
+}
+function getReaction(item) {
+  return loadReactions()[item.title] || null; // "like" | "dislike" | null
+}
+
+function toggleFavorite(item) {
+  if (!isLoggedIn()) {
+    toast("Sign in to save favorites", "warn");
+    openAuthModal();
+    return;
+  }
+  const favs = loadFavorites();
+  const i = favs.findIndex(f => f.title === item.title);
+  if (i >= 0) {
+    favs.splice(i, 1);
+    toast(`Removed from favorites`);
+  } else {
+    favs.unshift({
+      title: item.title, a: item.a, b: item.b,
+      strength: item.strength, source: item.source,
+      domains: item.domains, summary: item.summary,
+      savedAt: Date.now(),
+    });
+    toast(`★ Saved to favorites`);
+  }
+  saveFavorites(favs);
+}
+
+function setReaction(item, kind) {
+  const rxns = loadReactions();
+  const prev = rxns[item.title];
+  const prefs = loadPreferences();
+  // undo previous effect on prefs
+  if (prev) {
+    const sign = prev === "like" ? -1 : 1;
+    (item.domains || []).forEach(d => {
+      prefs[d] = (prefs[d] || 0) + sign;
+    });
+  }
+  if (prev === kind) {
+    delete rxns[item.title]; // toggle off
+    toast(`Reaction cleared`);
+  } else {
+    rxns[item.title] = kind;
+    const sign = kind === "like" ? 1 : -1;
+    (item.domains || []).forEach(d => {
+      prefs[d] = (prefs[d] || 0) + sign;
+    });
+    toast(kind === "like" ? "▲ Feed will favor similar topics" : "▼ Feed will avoid similar topics", kind === "dislike" ? "warn" : null);
+  }
+  saveReactions(rxns);
+  savePreferences(prefs);
+}
+
+// =====================================================================
+// TOAST
+// =====================================================================
+function toast(msg, kind = null) {
+  const tray = document.getElementById("toast-tray");
+  const t = document.createElement("div");
+  t.className = "toast" + (kind ? " " + kind : "");
+  t.textContent = msg;
+  tray.appendChild(t);
+  setTimeout(() => t.remove(), 2900);
+}
+
+// =====================================================================
+// SMART CANVAS — flowcharting workspace
+// =====================================================================
+const CANVAS = {
+  nodes: [],       // { id, x, y, kind, title, text, w?, h? }
+  edges: [],       // { id, from, to }
+  pan: { x: 200, y: 100 },
+  zoom: 1,
+  tool: "select",  // select | add-node | add-note | add-decision | connect | delete
+  connectSource: null,
+  dragging: null,
+};
+
+function loadCanvas() {
+  try {
+    const raw = localStorage.getItem(userKey("canvas"));
+    if (raw) {
+      const c = JSON.parse(raw);
+      CANVAS.nodes = c.nodes || [];
+      CANVAS.edges = c.edges || [];
+      CANVAS.pan = c.pan || { x: 200, y: 100 };
+      CANVAS.zoom = c.zoom || 1;
+    } else {
+      CANVAS.nodes = []; CANVAS.edges = [];
+      CANVAS.pan = { x: 200, y: 100 }; CANVAS.zoom = 1;
+    }
+  } catch (e) {
+    CANVAS.nodes = []; CANVAS.edges = [];
+  }
+}
+function saveCanvas() {
+  if (!isLoggedIn()) return;
+  localStorage.setItem(userKey("canvas"), JSON.stringify({
+    nodes: CANVAS.nodes, edges: CANVAS.edges,
+    pan: CANVAS.pan, zoom: CANVAS.zoom,
+  }));
+}
+
+function openCanvas() {
+  if (!isLoggedIn()) {
+    toast("Sign in to use the Smart Canvas", "warn");
+    openAuthModal();
+    return;
+  }
+  loadCanvas();
+  document.getElementById("canvas-overlay").classList.add("open");
+  renderCanvas();
+}
+function closeCanvas() {
+  document.getElementById("canvas-overlay").classList.remove("open");
+}
+
+function setCanvasTool(tool) {
+  CANVAS.tool = tool;
+  CANVAS.connectSource = null;
+  document.querySelectorAll(".canvas-tool[data-tool]").forEach(b => {
+    b.classList.toggle("active", b.dataset.tool === tool);
+  });
+  const ws = document.getElementById("canvas-workspace");
+  ws.classList.remove("tool-add-node","tool-add-note","tool-add-decision","tool-connect","tool-delete");
+  if (tool !== "select") ws.classList.add("tool-" + tool);
+}
+
+function addCanvasNode(node) {
+  CANVAS.nodes.push(node);
+  saveCanvas();
+  renderCanvas();
+}
+
+function addCardToCanvas(item) {
+  if (!isLoggedIn()) {
+    toast("Sign in to add to Canvas", "warn");
+    openAuthModal();
+    return;
+  }
+  loadCanvas();
+  // place near center of current view, with some scatter
+  const cx = -CANVAS.pan.x + window.innerWidth / 2 + (Math.random() - 0.5) * 100;
+  const cy = -CANVAS.pan.y + window.innerHeight / 2 + (Math.random() - 0.5) * 80;
+  CANVAS.nodes.push({
+    id: newId(),
+    x: cx, y: cy,
+    kind: "correlation",
+    title: `${item.source || "curated"} · r≈${item.strength.toFixed(2)}`,
+    text: `${item.a}  ↔  ${item.b}`,
+  });
+  saveCanvas();
+  toast("⊞ Added to Canvas");
+}
+
+function renderCanvas() {
+  const board = document.getElementById("canvas-board");
+  const svg = document.getElementById("canvas-edges");
+  const empty = document.getElementById("canvas-empty");
+  // clear nodes (but keep SVG)
+  [...board.children].forEach(c => { if (c.tagName !== "svg") c.remove(); });
+
+  board.style.transform = `translate(${CANVAS.pan.x}px, ${CANVAS.pan.y}px) scale(${CANVAS.zoom})`;
+  empty.style.display = CANVAS.nodes.length === 0 ? "block" : "none";
+
+  // nodes
+  CANVAS.nodes.forEach(n => {
+    const el = document.createElement("div");
+    el.className = `canvas-node kind-${n.kind}`;
+    el.dataset.nodeId = n.id;
+    el.style.left = `${n.x}px`;
+    el.style.top = `${n.y}px`;
+    el.innerHTML = `
+      ${n.title ? `<div class="node-title">${escapeHtml(n.title)}</div>` : ""}
+      <div class="node-text">${escapeHtml(n.text || "")}</div>
+    `;
+    wireNode(el, n);
+    board.appendChild(el);
+  });
+
+  // edges
+  svg.innerHTML = "";
+  CANVAS.edges.forEach(e => {
+    const a = CANVAS.nodes.find(n => n.id === e.from);
+    const b = CANVAS.nodes.find(n => n.id === e.to);
+    if (!a || !b) return;
+    // wait a tick for node sizes; use estimated anchors
+    const ax = a.x + 100, ay = a.y + 25;
+    const bx = b.x + 100, by = b.y + 25;
+    const dx = bx - ax;
+    const c1x = ax + dx * 0.4, c1y = ay;
+    const c2x = bx - dx * 0.4, c2y = by;
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M ${ax} ${ay} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${bx} ${by}`);
+    path.dataset.edgeId = e.id;
+    path.addEventListener("click", () => {
+      if (CANVAS.tool === "delete") {
+        CANVAS.edges = CANVAS.edges.filter(ed => ed.id !== e.id);
+        saveCanvas(); renderCanvas();
+      }
+    });
+    svg.appendChild(path);
+  });
+
+  document.getElementById("canvas-meta-inline").textContent =
+    `${CANVAS.nodes.length} nodes · ${CANVAS.edges.length} edges · ${(CANVAS.zoom*100).toFixed(0)}%`;
+}
+
+function wireNode(el, node) {
+  let dragStart = null;
+  el.addEventListener("mousedown", (e) => {
+    if (e.target.isContentEditable) return;
+    if (CANVAS.tool === "delete") {
+      CANVAS.nodes = CANVAS.nodes.filter(n => n.id !== node.id);
+      CANVAS.edges = CANVAS.edges.filter(ed => ed.from !== node.id && ed.to !== node.id);
+      saveCanvas(); renderCanvas();
+      e.stopPropagation();
+      return;
+    }
+    if (CANVAS.tool === "connect") {
+      if (!CANVAS.connectSource) {
+        CANVAS.connectSource = node.id;
+        el.classList.add("connect-source");
+      } else if (CANVAS.connectSource !== node.id) {
+        const exists = CANVAS.edges.some(ed =>
+          ed.from === CANVAS.connectSource && ed.to === node.id);
+        if (!exists) {
+          CANVAS.edges.push({ id: newId(), from: CANVAS.connectSource, to: node.id });
+          saveCanvas();
+        }
+        CANVAS.connectSource = null;
+        renderCanvas();
+      }
+      e.stopPropagation();
+      return;
+    }
+    if (CANVAS.tool === "select") {
+      dragStart = { mx: e.clientX, my: e.clientY, nx: node.x, ny: node.y };
+      el.classList.add("dragging");
+      e.stopPropagation();
+    }
+  });
+  el.addEventListener("dblclick", (e) => {
+    el.setAttribute("contenteditable", "true");
+    el.focus();
+    e.stopPropagation();
+  });
+  el.addEventListener("blur", () => {
+    if (el.getAttribute("contenteditable") === "true") {
+      el.removeAttribute("contenteditable");
+      // capture the new text (preserve title)
+      const titleEl = el.querySelector(".node-title");
+      const textEl = el.querySelector(".node-text");
+      if (textEl) node.text = textEl.textContent;
+      if (titleEl) node.title = titleEl.textContent;
+      saveCanvas();
+    }
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!dragStart) return;
+    const dx = (e.clientX - dragStart.mx) / CANVAS.zoom;
+    const dy = (e.clientY - dragStart.my) / CANVAS.zoom;
+    node.x = dragStart.nx + dx;
+    node.y = dragStart.ny + dy;
+    el.style.left = `${node.x}px`;
+    el.style.top = `${node.y}px`;
+    // re-render only edges for perf
+    const svg = document.getElementById("canvas-edges");
+    svg.innerHTML = "";
+    CANVAS.edges.forEach(edge => {
+      const a = CANVAS.nodes.find(n => n.id === edge.from);
+      const b = CANVAS.nodes.find(n => n.id === edge.to);
+      if (!a || !b) return;
+      const ax = a.x + 100, ay = a.y + 25;
+      const bx = b.x + 100, by = b.y + 25;
+      const dxe = bx - ax;
+      const c1x = ax + dxe * 0.4, c1y = ay;
+      const c2x = bx - dxe * 0.4, c2y = by;
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", `M ${ax} ${ay} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${bx} ${by}`);
+      svg.appendChild(path);
+    });
+  });
+  document.addEventListener("mouseup", () => {
+    if (dragStart) {
+      el.classList.remove("dragging");
+      dragStart = null;
+      saveCanvas();
+    }
+  });
+}
+
+function wireCanvas() {
+  const ws = document.getElementById("canvas-workspace");
+  document.querySelectorAll(".canvas-tool[data-tool]").forEach(b => {
+    b.addEventListener("click", () => setCanvasTool(b.dataset.tool));
+  });
+  document.getElementById("canvas-clear").addEventListener("click", () => {
+    if (CANVAS.nodes.length === 0) return;
+    if (!confirm("Clear the entire canvas? This cannot be undone.")) return;
+    CANVAS.nodes = []; CANVAS.edges = []; CANVAS.connectSource = null;
+    saveCanvas(); renderCanvas();
+  });
+  document.getElementById("canvas-close").addEventListener("click", closeCanvas);
+  document.getElementById("canvas-btn").addEventListener("click", openCanvas);
+  document.getElementById("auth-btn").addEventListener("click", openAuthModal);
+  document.getElementById("auth-modal-close").addEventListener("click", closeAuthModal);
+  document.getElementById("auth-modal").addEventListener("click", (e) => {
+    if (e.target.id === "auth-modal") closeAuthModal();
+  });
+
+  // pan
+  let panStart = null;
+  ws.addEventListener("mousedown", (e) => {
+    if (e.target.classList.contains("canvas-node") || e.target.closest(".canvas-node")) return;
+    if (e.target.tagName === "path") return;
+    if (CANVAS.tool === "add-node" || CANVAS.tool === "add-note" || CANVAS.tool === "add-decision") {
+      const rect = ws.getBoundingClientRect();
+      const x = (e.clientX - rect.left - CANVAS.pan.x) / CANVAS.zoom;
+      const y = (e.clientY - rect.top - CANVAS.pan.y) / CANVAS.zoom;
+      const kind = CANVAS.tool === "add-note" ? "note"
+                 : CANVAS.tool === "add-decision" ? "decision" : "rect";
+      const titleMap = { rect: "node", note: "note", decision: "decision" };
+      addCanvasNode({
+        id: newId(), x, y, kind,
+        title: titleMap[kind], text: "double-click to edit",
+      });
+      return;
+    }
+    panStart = { mx: e.clientX, my: e.clientY, px: CANVAS.pan.x, py: CANVAS.pan.y };
+    ws.classList.add("panning");
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!panStart) return;
+    CANVAS.pan.x = panStart.px + (e.clientX - panStart.mx);
+    CANVAS.pan.y = panStart.py + (e.clientY - panStart.my);
+    document.getElementById("canvas-board").style.transform =
+      `translate(${CANVAS.pan.x}px, ${CANVAS.pan.y}px) scale(${CANVAS.zoom})`;
+  });
+  document.addEventListener("mouseup", () => {
+    if (panStart) {
+      panStart = null;
+      ws.classList.remove("panning");
+      saveCanvas();
+    }
+  });
+
+  // zoom
+  ws.addEventListener("wheel", (e) => {
+    if (!document.getElementById("canvas-overlay").classList.contains("open")) return;
+    e.preventDefault();
+    const oldZoom = CANVAS.zoom;
+    const factor = e.deltaY > 0 ? 0.92 : 1.08;
+    CANVAS.zoom = Math.max(0.3, Math.min(2.4, oldZoom * factor));
+    // zoom to cursor
+    const rect = ws.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    CANVAS.pan.x = mx - (mx - CANVAS.pan.x) * (CANVAS.zoom / oldZoom);
+    CANVAS.pan.y = my - (my - CANVAS.pan.y) * (CANVAS.zoom / oldZoom);
+    document.getElementById("canvas-board").style.transform =
+      `translate(${CANVAS.pan.x}px, ${CANVAS.pan.y}px) scale(${CANVAS.zoom})`;
+    document.getElementById("canvas-meta-inline").textContent =
+      `${CANVAS.nodes.length} nodes · ${CANVAS.edges.length} edges · ${(CANVAS.zoom*100).toFixed(0)}%`;
+    saveCanvas();
+  }, { passive: false });
+
+  // keyboard shortcuts when canvas open
+  document.addEventListener("keydown", (e) => {
+    if (!document.getElementById("canvas-overlay").classList.contains("open")) return;
+    if (e.target.isContentEditable) return;
+    if (e.key === "Escape") { setCanvasTool("select"); }
+    if (e.key === "v" || e.key === "V") setCanvasTool("select");
+    if (e.key === "n" || e.key === "N") setCanvasTool("add-node");
+    if (e.key === "s" || e.key === "S") setCanvasTool("add-note");
+    if (e.key === "d" || e.key === "D") setCanvasTool("add-decision");
+    if (e.key === "c" || e.key === "C") setCanvasTool("connect");
+    if (e.key === "x" || e.key === "X") setCanvasTool("delete");
+  });
 }
 
 function readCard(id) {
@@ -1687,19 +2743,51 @@ function wireScan() {
 
 function wireFeedActions() {
   document.getElementById("feed").addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-action='read']");
+    const btn = e.target.closest("[data-action]");
     if (!btn) return;
     e.preventDefault();
-    readCard(btn.dataset.id);
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    const item = state.feed.find(i => i.id === id);
+    if (!item && action !== "read") return;
+
+    if (action === "read") {
+      readCard(id);
+      return;
+    }
+    if (action === "favorite") {
+      btn.classList.add("pop");
+      setTimeout(() => btn.classList.remove("pop"), 400);
+      toggleFavorite(item);
+      // re-render to update active state across cards
+      render();
+      return;
+    }
+    if (action === "like" || action === "dislike") {
+      btn.classList.add("pop");
+      setTimeout(() => btn.classList.remove("pop"), 400);
+      setReaction(item, action);
+      render();
+      return;
+    }
+    if (action === "add-canvas") {
+      btn.classList.add("pop");
+      setTimeout(() => btn.classList.remove("pop"), 400);
+      addCardToCanvas(item);
+      return;
+    }
   });
 }
 
 function init() {
+  loadAuth();
+  updateAuthUI();
   buildDomainCloud();
   wireSourceChips();
   wireSearch();
   wireScan();
   wireFeedActions();
+  wireCanvas();
   document.getElementById("discover").addEventListener("click", discoverNew);
   document.getElementById("reseed").addEventListener("click", reseed);
   reseed();
