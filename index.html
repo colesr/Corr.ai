@@ -953,6 +953,298 @@
   @keyframes toastOut {
     to { opacity: 0; transform: translateX(20px); }
   }
+
+  /* ===== sidebar collapsible sections (Favorites / Scans) ===== */
+  .sidebar-section { margin-top: 14px; }
+  .sidebar-section h2.collapsible-head {
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; user-select: none;
+  }
+  .sidebar-section h2.collapsible-head .head-meta {
+    font-size: 10px; color: var(--ink-dim);
+    background: var(--panel-2); padding: 1px 7px; border-radius: 999px;
+    border: 1px solid var(--line); letter-spacing: 0;
+    text-transform: none;
+  }
+  .sidebar-section.collapsed .body { display: none; }
+  .sidebar-section.collapsed h2.collapsible-head::after {
+    content: " ▸"; color: var(--ink-dim); margin-left: auto;
+  }
+  .sidebar-actions {
+    display: flex; gap: 6px; margin-bottom: 10px;
+  }
+  button.action.tiny {
+    padding: 5px 9px; font-size: 11px; letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  .sidebar-list {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 320px; overflow-y: auto;
+    padding-right: 4px;
+  }
+  .sidebar-list-empty {
+    color: var(--ink-dim); font-size: 11px;
+    text-align: center; padding: 10px 0;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .sidebar-row {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 3px; padding: 7px 9px;
+    display: flex; flex-direction: column; gap: 3px;
+    transition: border-color 0.15s, transform 0.15s;
+    cursor: pointer;
+    position: relative;
+  }
+  .sidebar-row:hover {
+    border-color: var(--ink-dim); transform: translateX(2px);
+  }
+  .sidebar-row .row-title {
+    font-size: 11px; color: var(--ink);
+    line-height: 1.35; word-break: break-word;
+    padding-right: 56px;
+  }
+  .sidebar-row .row-sub {
+    font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.04em;
+    display: flex; gap: 6px; align-items: center;
+  }
+  .sidebar-row .row-sub .r {
+    color: var(--accent); font-weight: 600;
+  }
+  .sidebar-row .row-sub .r.neg { color: var(--accent-2); }
+  .sidebar-row .row-actions {
+    position: absolute; top: 6px; right: 6px;
+    display: flex; gap: 3px;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .sidebar-row:hover .row-actions { opacity: 1; }
+  .sidebar-row .row-actions button {
+    background: var(--panel); border: 1px solid var(--line);
+    color: var(--ink-dim); width: 22px; height: 22px;
+    border-radius: 3px; font-family: inherit; font-size: 11px;
+    cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .sidebar-row .row-actions button:hover {
+    color: var(--accent); border-color: var(--accent);
+  }
+  .sidebar-row .row-actions button.danger:hover {
+    color: var(--bad); border-color: var(--bad);
+  }
+
+  /* ===== card note inline + 🗒 button ===== */
+  .card-note {
+    background: rgba(255, 180, 84, 0.06);
+    border-left: 2px solid var(--warn);
+    color: var(--ink);
+    font-style: italic;
+    font-size: 12px;
+    padding: 6px 10px;
+    margin: 8px 0 0;
+    border-radius: 0 3px 3px 0;
+  }
+  .card-note::before {
+    content: "🗒 ";
+    font-style: normal; opacity: 0.7;
+  }
+  .card-action.note.active {
+    color: var(--warn); border-color: var(--warn);
+  }
+  .card-action.note.active:hover { background: rgba(255,180,84,0.08); }
+
+  /* ===== canvas switcher ===== */
+  .canvas-switcher {
+    position: relative;
+  }
+  .canvas-switcher-btn {
+    background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--ink); padding: 6px 12px;
+    border-radius: 3px; font-family: inherit; font-size: 12px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    letter-spacing: 0.04em;
+  }
+  .canvas-switcher-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .canvas-switcher-btn .caret { color: var(--ink-dim); font-size: 10px; }
+  .canvas-switcher-menu {
+    position: absolute; top: calc(100% + 4px); left: 0;
+    min-width: 240px;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 3px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.55);
+    padding: 6px;
+    z-index: 50;
+  }
+  .canvas-switcher-menu .csm-action {
+    width: 100%; background: transparent; border: 1px solid transparent;
+    color: var(--ink); font-family: inherit; font-size: 12px;
+    text-align: left; padding: 7px 9px; border-radius: 3px;
+    cursor: pointer;
+  }
+  .canvas-switcher-menu .csm-action:hover {
+    background: var(--panel-2); border-color: var(--line);
+  }
+  .canvas-switcher-menu .csm-action.danger:hover {
+    color: var(--bad); border-color: var(--bad);
+  }
+  .canvas-switcher-menu .csm-divider {
+    height: 1px; background: var(--line); margin: 6px 0;
+  }
+  .canvas-switcher-menu .csm-label {
+    font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 9px;
+  }
+  .canvas-switcher-menu .csm-list {
+    max-height: 220px; overflow-y: auto;
+  }
+  .canvas-switcher-menu .csm-item {
+    width: 100%; background: transparent; border: 1px solid transparent;
+    color: var(--ink-dim); font-family: inherit; font-size: 12px;
+    text-align: left; padding: 6px 9px; border-radius: 3px;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  }
+  .canvas-switcher-menu .csm-item:hover {
+    background: var(--panel-2); color: var(--ink); border-color: var(--line);
+  }
+  .canvas-switcher-menu .csm-item.active {
+    color: var(--accent); background: rgba(214,255,92,0.08);
+    border-color: var(--accent);
+  }
+  .canvas-switcher-menu .csm-item .csm-meta {
+    font-size: 10px; color: var(--ink-dim); letter-spacing: 0;
+  }
+
+  /* ===== node details side panel ===== */
+  .node-details-panel {
+    position: fixed; top: 0; right: 0; height: 100vh;
+    width: 460px; max-width: 100vw;
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    z-index: 45;
+    display: flex; flex-direction: column;
+    box-shadow: -20px 0 50px rgba(0,0,0,0.55);
+  }
+  .node-details-panel.open { transform: translateX(0); }
+  .ndp-head {
+    padding: 16px 22px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--panel-2);
+  }
+  .ndp-title {
+    color: var(--accent-3);
+    font-size: 12px; letter-spacing: 0.18em; font-weight: 600;
+  }
+  .ndp-body {
+    padding: 18px 22px; flex: 1; overflow-y: auto;
+  }
+  .ndp-body .ndp-jump {
+    width: 100%;
+    background: var(--accent-3); color: var(--bg);
+    border: 0; padding: 10px 12px; border-radius: 3px;
+    font-family: inherit; font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+    cursor: pointer; margin-bottom: 14px;
+  }
+  .ndp-body .ndp-jump:hover { filter: brightness(1.1); }
+  .ndp-body .ndp-jump.unavailable {
+    background: var(--panel-2); color: var(--ink-dim);
+    border: 1px dashed var(--line); cursor: not-allowed;
+  }
+  .ndp-body .ndp-section {
+    border-top: 1px dashed var(--line);
+    padding-top: 12px; margin-top: 12px;
+  }
+  .ndp-body .ndp-section-label {
+    font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .ndp-snapshot {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 3px; padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .ndp-pair {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; margin: 8px 0;
+  }
+  .ndp-pair .ndp-a, .ndp-pair .ndp-b {
+    background: var(--bg); border: 1px solid var(--line);
+    padding: 5px 9px; border-radius: 3px; flex: 1; min-width: 0;
+    word-break: break-word;
+  }
+  .ndp-pair .x { color: var(--accent-2); font-weight: bold; padding: 0 4px; }
+  .ndp-investigate {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .ndp-investigate a {
+    font-size: 11px; color: var(--ink-dim); border: 1px solid var(--line);
+    padding: 4px 9px; border-radius: 3px; letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .ndp-investigate a:hover {
+    color: var(--accent); border-color: var(--accent); text-decoration: none;
+  }
+  .ndp-note {
+    background: rgba(255, 180, 84, 0.06);
+    border-left: 2px solid var(--warn);
+    color: var(--ink); font-style: italic; font-size: 12px;
+    padding: 7px 10px;
+  }
+
+  /* ===== note popover modal ===== */
+  .note-target {
+    background: var(--panel-2); border: 1px solid var(--line);
+    padding: 8px 11px; border-radius: 3px;
+    font-size: 12px; color: var(--ink-dim);
+  }
+  #note-textarea {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--ink); padding: 10px 12px; border-radius: 3px;
+    font-family: inherit; font-size: 13px; resize: vertical;
+    min-height: 100px;
+  }
+  #note-textarea:focus { outline: none; border-color: var(--warn); }
+
+  /* ===== canvas node correlation note line ===== */
+  .canvas-node.kind-correlation .node-r {
+    font-size: 10px; color: var(--accent-3);
+    letter-spacing: 0.08em; margin-top: 4px; font-weight: 600;
+  }
+  .canvas-node.kind-correlation .node-note {
+    border-top: 1px dashed var(--line);
+    margin-top: 6px; padding-top: 6px;
+    font-size: 11px; color: var(--warn);
+    font-style: italic;
+  }
+  .canvas-node.kind-correlation .node-note::before {
+    content: "🗒 "; font-style: normal; opacity: 0.7;
+  }
+  .canvas-node.kind-scan-seed {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .canvas-node.kind-scan-seed .node-title { color: var(--bg); opacity: 0.8; }
+  .canvas-node .node-prov-hint {
+    position: absolute; top: 4px; right: 6px;
+    font-size: 9px; color: var(--ink-dim);
+    letter-spacing: 0.04em; opacity: 0.55;
+    pointer-events: none;
+  }
+
+  /* feed card scroll-target glow */
+  .card.feed-highlight {
+    animation: feedHighlight 1.6s ease-out;
+  }
+  @keyframes feedHighlight {
+    0% { box-shadow: 0 0 0 2px var(--accent-3), 0 0 24px var(--accent-3); }
+    100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
+  }
 </style>
 </head>
 <body>
@@ -1013,6 +1305,31 @@
         </div>
       </div>
     </section>
+
+    <section class="panel sidebar-section" id="favorites-section" style="display:none;">
+      <h2 class="collapsible-head" data-collapse="favorites-body">
+        <span>Favorites</span>
+        <span class="head-meta"><span id="favorites-count">0</span></span>
+      </h2>
+      <div class="body collapsible-body" id="favorites-body">
+        <div class="sidebar-actions">
+          <button class="action tiny" id="favorites-drop-all" title="Drop all favorites onto the active Canvas">
+            ⊞ all → canvas
+          </button>
+        </div>
+        <div id="favorites-list" class="sidebar-list"></div>
+      </div>
+    </section>
+
+    <section class="panel sidebar-section" id="scans-section" style="display:none;">
+      <h2 class="collapsible-head" data-collapse="scans-body">
+        <span>Scan history</span>
+        <span class="head-meta"><span id="scans-count">0</span></span>
+      </h2>
+      <div class="body collapsible-body" id="scans-body">
+        <div id="scans-list" class="sidebar-list"></div>
+      </div>
+    </section>
   </aside>
 
   <section>
@@ -1066,7 +1383,20 @@
 
 <div class="canvas-overlay" id="canvas-overlay">
   <div class="canvas-head">
-    <h2>▸ SMART CANVAS</h2>
+    <h2>▸ CANVAS</h2>
+    <div class="canvas-switcher">
+      <button class="canvas-switcher-btn" id="canvas-switcher-btn">
+        <span id="canvas-switcher-label">Untitled</span> <span class="caret">▾</span>
+      </button>
+      <div class="canvas-switcher-menu" id="canvas-switcher-menu" style="display:none;">
+        <button class="csm-action" data-csm="new">＋ New canvas</button>
+        <button class="csm-action" data-csm="rename">↻ Rename current</button>
+        <button class="csm-action danger" data-csm="delete">× Delete current</button>
+        <div class="csm-divider"></div>
+        <div class="csm-label">switch to</div>
+        <div id="canvas-switcher-list" class="csm-list"></div>
+      </div>
+    </div>
     <div class="canvas-toolbar">
       <button class="canvas-tool active" data-tool="select" title="Select / drag nodes (V)">▸ Select</button>
       <button class="canvas-tool" data-tool="add-node" title="Click empty space to add a node (N)">＋ Node</button>
@@ -1078,6 +1408,9 @@
     </div>
     <span class="grow"></span>
     <span class="canvas-meta-inline" id="canvas-meta-inline"></span>
+    <button class="canvas-close" id="canvas-export" title="Export this canvas as JSON">▸ Export</button>
+    <button class="canvas-close" id="canvas-import" title="Import a canvas JSON file">▸ Import</button>
+    <input type="file" id="canvas-import-file" accept="application/json,.json" style="display:none;" />
     <button class="canvas-close" id="canvas-close">× Close</button>
   </div>
   <div class="canvas-workspace" id="canvas-workspace">
@@ -1092,6 +1425,52 @@
     <div class="canvas-help">
       <b>scroll</b> to zoom · <b>drag</b> empty space to pan<br/>
       <b>double-click</b> a node to edit · <b>esc</b> to deselect tool
+    </div>
+  </div>
+</div>
+
+<aside id="node-details-panel" class="node-details-panel" aria-hidden="true">
+  <div class="ndp-head">
+    <div class="ndp-title">▸ NODE PROVENANCE</div>
+    <button class="modal-close" id="ndp-close">×</button>
+  </div>
+  <div class="ndp-body" id="node-details-body"></div>
+</aside>
+
+<div class="modal-backdrop" id="note-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="note-modal-title">▸ NOTE</div>
+      <button class="modal-close" id="note-modal-close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label id="note-modal-for">attached to</label>
+        <div class="note-target" id="note-target"></div>
+      </div>
+      <div class="modal-field">
+        <label for="note-textarea">your note</label>
+        <textarea id="note-textarea" rows="6" placeholder="hypothesis, observation, follow-up… markdown not parsed."></textarea>
+      </div>
+      <button class="modal-submit" id="note-save">▸ Save note</button>
+      <button class="modal-anon" id="note-delete">× Delete note</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="canvas-name-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="canvas-name-title">▸ NAME CANVAS</div>
+      <button class="modal-close" id="canvas-name-close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label for="canvas-name-input">canvas name</label>
+        <input id="canvas-name-input" type="text" placeholder="e.g. Lunar effects, Spurious time-series…" />
+      </div>
+      <div class="modal-err" id="canvas-name-err"></div>
+      <button class="modal-submit" id="canvas-name-submit">▸ Save</button>
     </div>
   </div>
 </div>
@@ -1513,12 +1892,16 @@ function renderCard(item) {
   const rxn = getReaction(item);
   const favLockClass = isLoggedIn() ? "" : " locked";
   const canvasLockClass = isLoggedIn() ? "" : " locked";
+  const noteLockClass = isLoggedIn() ? "" : " locked";
+  const userNote = isLoggedIn() ? getNoteFor(item.title) : null;
+  const noteActiveClass = userNote ? " active" : "";
 
   card.innerHTML = `
     <div class="card-actions">
       <button class="card-action fav${favActive ? " active" : ""}${favLockClass}" data-action="favorite" data-id="${item.id}" title="${isLoggedIn() ? "Favorite this correlation" : "Sign in to favorite"}">★</button>
       <button class="card-action like${rxn === "like" ? " active" : ""}" data-action="like" data-id="${item.id}" title="Like — feed will favor similar topics">▲</button>
       <button class="card-action dislike${rxn === "dislike" ? " active" : ""}" data-action="dislike" data-id="${item.id}" title="Dislike — feed will avoid similar topics">▼</button>
+      <button class="card-action note${noteActiveClass}${noteLockClass}" data-action="note" data-id="${item.id}" title="${isLoggedIn() ? "Add or edit a note" : "Sign in to add notes"}">🗒</button>
       <button class="card-action canvas${canvasLockClass}" data-action="add-canvas" data-id="${item.id}" title="${isLoggedIn() ? "Add to Smart Canvas" : "Sign in to use Canvas"}">⊞</button>
     </div>
     <div class="meta">
@@ -1537,6 +1920,7 @@ function renderCard(item) {
     </div>
     <div class="strength"><div style="width:${strengthPct}%"></div></div>
     <div class="summary">${escapeHtml(item.summary)}</div>
+    ${userNote ? `<div class="card-note">${escapeHtml(userNote)}</div>` : ""}
     <details>
       <summary>why this matters</summary>
       <div class="why">${escapeHtml(item.why).replace(/\n/g, "<br/>")}</div>
@@ -1669,6 +2053,9 @@ function updateAuthUI() {
     btn.title = "Sign in to unlock favorites & canvas";
     canvasBtn.style.display = "none";
   }
+  // refresh sidebar sections that depend on login state
+  if (typeof renderFavoritesList === "function") renderFavoritesList();
+  if (typeof renderScansList === "function") renderScansList();
 }
 
 function openAuthModal() {
@@ -1860,6 +2247,7 @@ function toggleFavorite(item) {
     toast(`★ Saved to favorites`);
   }
   saveFavorites(favs);
+  renderFavoritesList();
 }
 
 function setReaction(item, kind) {
@@ -1901,41 +2289,187 @@ function toast(msg, kind = null) {
 }
 
 // =====================================================================
-// SMART CANVAS — flowcharting workspace
+// SMART CANVAS — flowcharting workspace (named canvases per user)
 // =====================================================================
 const CANVAS = {
-  nodes: [],       // { id, x, y, kind, title, text, w?, h? }
-  edges: [],       // { id, from, to }
+  activeName: null,
+  nodes: [],
+  edges: [],
   pan: { x: 200, y: 100 },
   zoom: 1,
-  tool: "select",  // select | add-node | add-note | add-decision | connect | delete
+  tool: "select",
   connectSource: null,
   dragging: null,
 };
 
-function loadCanvas() {
-  try {
-    const raw = localStorage.getItem(userKey("canvas"));
-    if (raw) {
-      const c = JSON.parse(raw);
-      CANVAS.nodes = c.nodes || [];
-      CANVAS.edges = c.edges || [];
-      CANVAS.pan = c.pan || { x: 200, y: 100 };
-      CANVAS.zoom = c.zoom || 1;
-    } else {
-      CANVAS.nodes = []; CANVAS.edges = [];
-      CANVAS.pan = { x: 200, y: 100 }; CANVAS.zoom = 1;
-    }
-  } catch (e) {
-    CANVAS.nodes = []; CANVAS.edges = [];
-  }
+function loadAllCanvases() {
+  try { return JSON.parse(localStorage.getItem(userKey("canvases")) || "{}"); }
+  catch { return {}; }
 }
+function saveAllCanvases(map) {
+  localStorage.setItem(userKey("canvases"), JSON.stringify(map));
+}
+function getActiveCanvasName() {
+  return localStorage.getItem(userKey("activeCanvas")) || "Untitled";
+}
+function setActiveCanvasName(name) {
+  localStorage.setItem(userKey("activeCanvas"), name);
+}
+
+function migrateLegacyCanvas() {
+  // Migrate the pre-named-canvas single-canvas key, if it exists.
+  const legacy = localStorage.getItem(userKey("canvas"));
+  if (!legacy) return;
+  const all = loadAllCanvases();
+  if (all["Untitled"] && all["Untitled"].nodes && all["Untitled"].nodes.length > 0) {
+    localStorage.removeItem(userKey("canvas"));
+    return;
+  }
+  try {
+    const data = JSON.parse(legacy);
+    all["Untitled"] = {
+      nodes: data.nodes || [],
+      edges: data.edges || [],
+      pan: data.pan || { x: 200, y: 100 },
+      zoom: data.zoom || 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    saveAllCanvases(all);
+    setActiveCanvasName("Untitled");
+  } catch {}
+  localStorage.removeItem(userKey("canvas"));
+}
+
+function loadCanvas() {
+  if (!isLoggedIn()) {
+    CANVAS.nodes = []; CANVAS.edges = []; CANVAS.activeName = null;
+    return;
+  }
+  migrateLegacyCanvas();
+  const all = loadAllCanvases();
+  let name = getActiveCanvasName();
+  if (!all[name]) {
+    if (Object.keys(all).length === 0) {
+      all["Untitled"] = {
+        nodes: [], edges: [],
+        pan: { x: 200, y: 100 }, zoom: 1,
+        createdAt: Date.now(), updatedAt: Date.now(),
+      };
+      saveAllCanvases(all);
+      name = "Untitled";
+    } else {
+      name = Object.keys(all)[0];
+    }
+    setActiveCanvasName(name);
+  }
+  const c = all[name];
+  CANVAS.activeName = name;
+  CANVAS.nodes = c.nodes || [];
+  CANVAS.edges = c.edges || [];
+  CANVAS.pan = c.pan || { x: 200, y: 100 };
+  CANVAS.zoom = c.zoom || 1;
+}
+
 function saveCanvas() {
-  if (!isLoggedIn()) return;
-  localStorage.setItem(userKey("canvas"), JSON.stringify({
+  if (!isLoggedIn() || !CANVAS.activeName) return;
+  const all = loadAllCanvases();
+  all[CANVAS.activeName] = {
     nodes: CANVAS.nodes, edges: CANVAS.edges,
     pan: CANVAS.pan, zoom: CANVAS.zoom,
-  }));
+    createdAt: all[CANVAS.activeName]?.createdAt || Date.now(),
+    updatedAt: Date.now(),
+  };
+  saveAllCanvases(all);
+}
+
+function createCanvas(name) {
+  if (!isLoggedIn() || !name) return false;
+  const all = loadAllCanvases();
+  if (all[name]) { toast(`A canvas named "${name}" already exists`, "warn"); return false; }
+  all[name] = {
+    nodes: [], edges: [],
+    pan: { x: 200, y: 100 }, zoom: 1,
+    createdAt: Date.now(), updatedAt: Date.now(),
+  };
+  saveAllCanvases(all);
+  setActiveCanvasName(name);
+  loadCanvas();
+  renderCanvas();
+  renderCanvasSwitcher();
+  toast(`▸ Created canvas "${name}"`);
+  return true;
+}
+
+function switchCanvas(name) {
+  if (!isLoggedIn()) return;
+  saveCanvas();
+  setActiveCanvasName(name);
+  loadCanvas();
+  renderCanvas();
+  renderCanvasSwitcher();
+  closeNodeDetails();
+  toast(`▸ Now on "${name}"`);
+}
+
+function renameCanvasTo(newName) {
+  if (!isLoggedIn() || !CANVAS.activeName || !newName) return false;
+  if (newName === CANVAS.activeName) return true;
+  const all = loadAllCanvases();
+  if (all[newName]) { toast(`"${newName}" already exists`, "warn"); return false; }
+  all[newName] = all[CANVAS.activeName];
+  delete all[CANVAS.activeName];
+  saveAllCanvases(all);
+  setActiveCanvasName(newName);
+  CANVAS.activeName = newName;
+  renderCanvasSwitcher();
+  toast(`▸ Renamed to "${newName}"`);
+  return true;
+}
+
+function deleteCurrentCanvas() {
+  if (!isLoggedIn() || !CANVAS.activeName) return;
+  const name = CANVAS.activeName;
+  if (!confirm(`Delete canvas "${name}"? Its nodes and edges will be lost.`)) return;
+  const all = loadAllCanvases();
+  delete all[name];
+  saveAllCanvases(all);
+  const remaining = Object.keys(all);
+  if (remaining.length === 0) {
+    all["Untitled"] = {
+      nodes: [], edges: [],
+      pan: { x: 200, y: 100 }, zoom: 1,
+      createdAt: Date.now(), updatedAt: Date.now(),
+    };
+    saveAllCanvases(all);
+    setActiveCanvasName("Untitled");
+  } else {
+    setActiveCanvasName(remaining[0]);
+  }
+  loadCanvas();
+  renderCanvas();
+  renderCanvasSwitcher();
+  toast(`× Deleted "${name}"`);
+}
+
+function renderCanvasSwitcher() {
+  const label = document.getElementById("canvas-switcher-label");
+  if (label) label.textContent = CANVAS.activeName || "Untitled";
+  const list = document.getElementById("canvas-switcher-list");
+  if (!list) return;
+  const all = loadAllCanvases();
+  const names = Object.keys(all).sort();
+  list.innerHTML = "";
+  names.forEach(n => {
+    const btn = document.createElement("button");
+    btn.className = "csm-item" + (n === CANVAS.activeName ? " active" : "");
+    btn.innerHTML = `<span>${escapeHtml(n)}</span><span class="csm-meta">${(all[n].nodes || []).length} nodes</span>`;
+    btn.addEventListener("click", () => {
+      if (n !== CANVAS.activeName) switchCanvas(n);
+      document.getElementById("canvas-switcher-menu").style.display = "none";
+    });
+    list.appendChild(btn);
+  });
 }
 
 function openCanvas() {
@@ -1969,6 +2503,22 @@ function addCanvasNode(node) {
   renderCanvas();
 }
 
+function snapshotFromItem(item) {
+  return {
+    a: item.a, b: item.b,
+    strength: item.strength,
+    source: item.source || "curated",
+    domains: item.domains || [],
+    summary: item.summary || "",
+    why: item.why || "",
+    a_url: item.a_url || null,
+    b_url: item.b_url || null,
+    sourceCardTitle: item.title,
+    scanRecordId: item.scanRecordId || null,
+    note: getNoteFor(item.title) || null,
+  };
+}
+
 function addCardToCanvas(item) {
   if (!isLoggedIn()) {
     toast("Sign in to add to Canvas", "warn");
@@ -1976,7 +2526,6 @@ function addCardToCanvas(item) {
     return;
   }
   loadCanvas();
-  // place near center of current view, with some scatter
   const cx = -CANVAS.pan.x + window.innerWidth / 2 + (Math.random() - 0.5) * 100;
   const cy = -CANVAS.pan.y + window.innerHeight / 2 + (Math.random() - 0.5) * 80;
   CANVAS.nodes.push({
@@ -1985,9 +2534,170 @@ function addCardToCanvas(item) {
     kind: "correlation",
     title: `${item.source || "curated"} · r≈${item.strength.toFixed(2)}`,
     text: `${item.a}  ↔  ${item.b}`,
+    snapshot: snapshotFromItem(item),
   });
   saveCanvas();
-  toast("⊞ Added to Canvas");
+  toast(`⊞ Added to "${CANVAS.activeName}"`);
+}
+
+// ---------- Notes on cards ----------
+function loadNotes() {
+  try { return JSON.parse(localStorage.getItem(userKey("notes")) || "{}"); }
+  catch { return {}; }
+}
+function saveNotes(map) { localStorage.setItem(userKey("notes"), JSON.stringify(map)); }
+function getNoteFor(cardTitle) {
+  return loadNotes()[cardTitle] || null;
+}
+function setNoteFor(cardTitle, text) {
+  const notes = loadNotes();
+  if (text && text.trim()) {
+    notes[cardTitle] = text.trim();
+  } else {
+    delete notes[cardTitle];
+  }
+  saveNotes(notes);
+}
+
+let _noteEditingFor = null;
+function openNoteEditor(item) {
+  if (!isLoggedIn()) {
+    toast("Sign in to add notes", "warn");
+    openAuthModal();
+    return;
+  }
+  _noteEditingFor = item.title;
+  document.getElementById("note-target").textContent = item.title;
+  const ta = document.getElementById("note-textarea");
+  ta.value = getNoteFor(item.title) || "";
+  document.getElementById("note-modal").classList.add("open");
+  setTimeout(() => ta.focus(), 100);
+}
+function closeNoteEditor() {
+  _noteEditingFor = null;
+  document.getElementById("note-modal").classList.remove("open");
+}
+
+// ---------- Node details side panel ----------
+function openNodeDetails(node) {
+  const panel = document.getElementById("node-details-panel");
+  const body = document.getElementById("node-details-body");
+  panel.classList.add("open");
+  panel.setAttribute("aria-hidden", "false");
+
+  if (node.kind !== "correlation" || !node.snapshot) {
+    // Generic / note / decision nodes — show their text and metadata
+    body.innerHTML = `
+      <div class="ndp-section-label">node kind</div>
+      <div class="ndp-snapshot">
+        <div style="color:var(--ink-dim); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;">${escapeHtml(node.kind)}</div>
+        <div style="font-size:13px; line-height:1.5;">${escapeHtml(node.text || "(no text)")}</div>
+      </div>
+      <div class="ndp-section">
+        <div class="ndp-section-label">about</div>
+        <div style="font-size:12px; color:var(--ink-dim); line-height:1.5;">
+          This node was created directly on the Canvas. Double-click it on the
+          board to edit its text, or use the delete tool to remove it.
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const snap = node.snapshot;
+  const sign = snap.strength < 0 ? "negative" : "positive";
+  const strengthPct = Math.min(100, Math.abs(snap.strength) * 100).toFixed(0);
+  const investigateItem = {
+    a: snap.a, b: snap.b,
+    a_url: snap.a_url, b_url: snap.b_url,
+  };
+  const links = investigateLinks(investigateItem);
+  const inFeed = !!state.feed.find(i => i.title === snap.sourceCardTitle);
+
+  body.innerHTML = `
+    <button class="ndp-jump ${inFeed ? "" : "unavailable"}" id="ndp-jump-btn" ${inFeed ? "" : "disabled"}>
+      ${inFeed ? "▸ Jump to source in feed" : "× source not in current feed"}
+    </button>
+
+    <div class="ndp-section-label">source</div>
+    <div class="ndp-snapshot">
+      <div class="meta" style="margin-bottom:6px;">
+        <span class="badge ${snap.source}">${escapeHtml(snap.source)}</span>
+        <span style="color:var(--ink-dim); font-size:10px; letter-spacing:0.06em; text-transform:uppercase; margin-left:6px;">
+          ${(snap.domains || []).filter(d => d !== "generated" && d !== "live" && d !== "scanned").join(" · ") || "—"}
+        </span>
+      </div>
+      <h3 style="font-size:14px; margin:6px 0 8px; color:var(--ink); font-weight:500; line-height:1.35;">${escapeHtml(snap.sourceCardTitle)}</h3>
+      <div class="ndp-pair">
+        <span class="ndp-a">${escapeHtml(snap.a)}</span>
+        <span class="x">↔</span>
+        <span class="ndp-b">${escapeHtml(snap.b)}</span>
+      </div>
+      <div class="strength-label">
+        <span>correlation ${sign}</span>
+        <span>r ≈ ${snap.strength.toFixed(2)}</span>
+      </div>
+      <div class="strength"><div style="width:${strengthPct}%"></div></div>
+    </div>
+
+    <div class="ndp-section-label">summary</div>
+    <div style="color:var(--ink); font-size:12px; line-height:1.55; margin-bottom:14px;">
+      ${escapeHtml(snap.summary || "—")}
+    </div>
+
+    ${snap.why ? `
+    <div class="ndp-section-label">why this matters</div>
+    <div style="color:var(--ink-dim); font-size:12px; line-height:1.55; margin-bottom:14px;">
+      ${escapeHtml(snap.why).replace(/\n/g, "<br/>")}
+    </div>` : ""}
+
+    ${snap.note ? `
+    <div class="ndp-section-label">your note</div>
+    <div class="ndp-note" style="margin-bottom:14px;">${escapeHtml(snap.note)}</div>` : ""}
+
+    <div class="ndp-section-label">investigate</div>
+    <div class="ndp-investigate">
+      ${links.map(l => `<a href="${l.href}" target="_blank" rel="noopener noreferrer">${l.label}</a>`).join("")}
+    </div>
+
+    ${snap.scanRecordId ? `
+    <div class="ndp-section">
+      <div class="ndp-section-label">scan provenance</div>
+      <button class="ndp-jump" data-scan-id="${snap.scanRecordId}" id="ndp-open-scan-btn" style="background:var(--accent-2); color:var(--bg);">
+        ▸ open source scan
+      </button>
+    </div>` : ""}
+  `;
+
+  const jumpBtn = document.getElementById("ndp-jump-btn");
+  if (jumpBtn && inFeed) {
+    jumpBtn.addEventListener("click", () => jumpToCardInFeed(snap.sourceCardTitle));
+  }
+  const openScanBtn = document.getElementById("ndp-open-scan-btn");
+  if (openScanBtn) {
+    openScanBtn.addEventListener("click", () => openScanRecord(openScanBtn.dataset.scanId));
+  }
+}
+function closeNodeDetails() {
+  document.getElementById("node-details-panel").classList.remove("open");
+  document.getElementById("node-details-panel").setAttribute("aria-hidden", "true");
+}
+
+function jumpToCardInFeed(cardTitle) {
+  const item = state.feed.find(i => i.title === cardTitle);
+  if (!item) return;
+  // Close canvas overlay so the feed is visible
+  closeCanvas();
+  closeNodeDetails();
+  // Find the rendered card and scroll
+  setTimeout(() => {
+    const el = document.querySelector(`[data-card-id="${item.id}"]`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.remove("feed-highlight");
+    void el.offsetWidth;
+    el.classList.add("feed-highlight");
+  }, 280);
 }
 
 function renderCanvas() {
@@ -2007,10 +2717,16 @@ function renderCanvas() {
     el.dataset.nodeId = n.id;
     el.style.left = `${n.x}px`;
     el.style.top = `${n.y}px`;
-    el.innerHTML = `
-      ${n.title ? `<div class="node-title">${escapeHtml(n.title)}</div>` : ""}
-      <div class="node-text">${escapeHtml(n.text || "")}</div>
-    `;
+    let inner = "";
+    if (n.title) inner += `<div class="node-title">${escapeHtml(n.title)}</div>`;
+    inner += `<div class="node-text">${escapeHtml(n.text || "")}</div>`;
+    if (n.kind === "correlation" && n.snapshot) {
+      if (n.snapshot.note) {
+        inner += `<div class="node-note">${escapeHtml(n.snapshot.note)}</div>`;
+      }
+      inner += `<div class="node-prov-hint">click for source</div>`;
+    }
+    el.innerHTML = inner;
     wireNode(el, n);
     board.appendChild(el);
   });
@@ -2072,10 +2788,22 @@ function wireNode(el, node) {
       return;
     }
     if (CANVAS.tool === "select") {
-      dragStart = { mx: e.clientX, my: e.clientY, nx: node.x, ny: node.y };
+      dragStart = {
+        mx: e.clientX, my: e.clientY,
+        nx: node.x, ny: node.y,
+        moved: false,
+      };
       el.classList.add("dragging");
       e.stopPropagation();
     }
+  });
+  el.addEventListener("click", (e) => {
+    // Click opens node details panel in Select mode (unless we just dragged)
+    if (e.target.isContentEditable) return;
+    if (CANVAS.tool !== "select") return;
+    if (dragStart && dragStart.moved) return;
+    openNodeDetails(node);
+    e.stopPropagation();
   });
   el.addEventListener("dblclick", (e) => {
     el.setAttribute("contenteditable", "true");
@@ -2098,6 +2826,7 @@ function wireNode(el, node) {
     if (!dragStart) return;
     const dx = (e.clientX - dragStart.mx) / CANVAS.zoom;
     const dy = (e.clientY - dragStart.my) / CANVAS.zoom;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragStart.moved = true;
     node.x = dragStart.nx + dx;
     node.y = dragStart.ny + dy;
     el.style.left = `${node.x}px`;
@@ -2207,7 +2936,8 @@ function wireCanvas() {
   document.addEventListener("keydown", (e) => {
     if (!document.getElementById("canvas-overlay").classList.contains("open")) return;
     if (e.target.isContentEditable) return;
-    if (e.key === "Escape") { setCanvasTool("select"); }
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (e.key === "Escape") { setCanvasTool("select"); closeNodeDetails(); }
     if (e.key === "v" || e.key === "V") setCanvasTool("select");
     if (e.key === "n" || e.key === "N") setCanvasTool("add-node");
     if (e.key === "s" || e.key === "S") setCanvasTool("add-note");
@@ -2215,6 +2945,122 @@ function wireCanvas() {
     if (e.key === "c" || e.key === "C") setCanvasTool("connect");
     if (e.key === "x" || e.key === "X") setCanvasTool("delete");
   });
+
+  // ---------- canvas switcher menu ----------
+  const switcherBtn = document.getElementById("canvas-switcher-btn");
+  const switcherMenu = document.getElementById("canvas-switcher-menu");
+  switcherBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = switcherMenu.style.display === "block";
+    if (!open) {
+      renderCanvasSwitcher();
+      switcherMenu.style.display = "block";
+    } else {
+      switcherMenu.style.display = "none";
+    }
+  });
+  document.addEventListener("click", (e) => {
+    if (!switcherMenu.contains(e.target) && e.target !== switcherBtn) {
+      switcherMenu.style.display = "none";
+    }
+  });
+  switcherMenu.querySelectorAll("[data-csm]").forEach(b => {
+    b.addEventListener("click", () => {
+      const act = b.dataset.csm;
+      switcherMenu.style.display = "none";
+      if (act === "new") openCanvasNameModal("new");
+      else if (act === "rename") openCanvasNameModal("rename");
+      else if (act === "delete") deleteCurrentCanvas();
+    });
+  });
+
+  // ---------- node details close ----------
+  document.getElementById("ndp-close").addEventListener("click", closeNodeDetails);
+
+  // ---------- export / import ----------
+  document.getElementById("canvas-export").addEventListener("click", exportCanvas);
+  document.getElementById("canvas-import").addEventListener("click", () => {
+    document.getElementById("canvas-import-file").click();
+  });
+  document.getElementById("canvas-import-file").addEventListener("change", (e) => {
+    const f = e.target.files?.[0];
+    if (f) importCanvasFile(f);
+    e.target.value = "";
+  });
+
+  // ---------- note modal ----------
+  document.getElementById("note-modal-close").addEventListener("click", closeNoteEditor);
+  document.getElementById("note-modal").addEventListener("click", (e) => {
+    if (e.target.id === "note-modal") closeNoteEditor();
+  });
+  document.getElementById("note-save").addEventListener("click", () => {
+    if (!_noteEditingFor) return;
+    setNoteFor(_noteEditingFor, document.getElementById("note-textarea").value);
+    closeNoteEditor();
+    toast("🗒 Note saved");
+    render();
+  });
+  document.getElementById("note-delete").addEventListener("click", () => {
+    if (!_noteEditingFor) return;
+    setNoteFor(_noteEditingFor, "");
+    closeNoteEditor();
+    toast("× Note removed");
+    render();
+  });
+
+  // ---------- canvas name modal ----------
+  document.getElementById("canvas-name-close").addEventListener("click", closeCanvasNameModal);
+  document.getElementById("canvas-name-modal").addEventListener("click", (e) => {
+    if (e.target.id === "canvas-name-modal") closeCanvasNameModal();
+  });
+  document.getElementById("canvas-name-submit").addEventListener("click", submitCanvasName);
+  document.getElementById("canvas-name-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submitCanvasName();
+  });
+
+  // ---------- sidebar Favorites / Scans actions ----------
+  const favHead = document.querySelector('[data-collapse="favorites-body"]');
+  const scansHead = document.querySelector('[data-collapse="scans-body"]');
+  if (favHead) favHead.addEventListener("click", () => {
+    favHead.closest(".sidebar-section").classList.toggle("collapsed");
+  });
+  if (scansHead) scansHead.addEventListener("click", () => {
+    scansHead.closest(".sidebar-section").classList.toggle("collapsed");
+  });
+  const dropAllBtn = document.getElementById("favorites-drop-all");
+  if (dropAllBtn) dropAllBtn.addEventListener("click", dropAllFavoritesOnCanvas);
+}
+
+let _canvasNameMode = "new"; // "new" or "rename"
+function openCanvasNameModal(mode) {
+  if (!isLoggedIn()) { openAuthModal(); return; }
+  _canvasNameMode = mode;
+  const modal = document.getElementById("canvas-name-modal");
+  const input = document.getElementById("canvas-name-input");
+  const title = document.getElementById("canvas-name-title");
+  const err = document.getElementById("canvas-name-err");
+  err.textContent = "";
+  title.textContent = mode === "rename" ? `▸ RENAME "${CANVAS.activeName}"` : "▸ NEW CANVAS";
+  input.value = mode === "rename" ? CANVAS.activeName : "";
+  modal.classList.add("open");
+  setTimeout(() => { input.focus(); input.select(); }, 100);
+}
+function closeCanvasNameModal() {
+  document.getElementById("canvas-name-modal").classList.remove("open");
+}
+function submitCanvasName() {
+  const name = document.getElementById("canvas-name-input").value.trim();
+  const err = document.getElementById("canvas-name-err");
+  if (!name) { err.textContent = "name required"; return; }
+  if (name.length > 60) { err.textContent = "too long (max 60 chars)"; return; }
+  if (_canvasNameMode === "rename") {
+    if (renameCanvasTo(name)) closeCanvasNameModal();
+  } else {
+    if (createCanvas(name)) {
+      closeCanvasNameModal();
+      openCanvas();
+    }
+  }
 }
 
 function readCard(id) {
@@ -2409,6 +3255,8 @@ const PHASE_DEFS = [
 let scanInProgress = false;
 let scanStartTime = 0;
 let scanElapsedTimer = null;
+let _currentScanLog = null; // array when a scan is running; null otherwise
+let _currentScanRecord = null;
 
 function buildPhases() {
   const wrap = document.getElementById("scan-phases");
@@ -2442,6 +3290,9 @@ function logLine(msg, level = "info") {
   ln.innerHTML = `<span class="ts">${ts}</span>${escapeHtml(msg)}`;
   log.appendChild(ln);
   log.scrollTop = log.scrollHeight;
+  if (Array.isArray(_currentScanLog)) {
+    _currentScanLog.push({ ts, msg, level });
+  }
 }
 
 function clearLog() {
@@ -2525,6 +3376,20 @@ async function runScan(rawQuery) {
   clearLog();
   setScanState("active");
   startElapsed();
+
+  // Initialize scan record for persistence
+  _currentScanLog = [];
+  _currentScanRecord = {
+    id: newId(),
+    query,
+    seedArticle: null,
+    candidates: [],
+    emittedIds: [],
+    semantic: [], links: [], books: [], randoms: [],
+    pool: [],
+    startedAt: Date.now(),
+    durationMs: 0,
+  };
 
   try {
     logLine(`▸ scan initiated: "${query}"`, "info");
@@ -2675,6 +3540,24 @@ async function runScan(rawQuery) {
     logLine(`scored ${pool.length} candidates`, "good");
     setPhase(7, "done", `${pool.length} scored`);
 
+    // capture artifacts into the scan record (for persistence + replay)
+    if (_currentScanRecord) {
+      _currentScanRecord.seedArticle = seedArticle ? {
+        title: seedArticle.title,
+        extract: seedArticle.extract,
+        url: seedArticle.content_urls?.desktop?.page,
+      } : null;
+      _currentScanRecord.candidates = candidates;
+      _currentScanRecord.semantic = semantic;
+      _currentScanRecord.links = links.slice(0, 80);
+      _currentScanRecord.books = books;
+      _currentScanRecord.randoms = randoms.map(r => ({
+        title: r.title, extract: r.extract,
+        url: r.content_urls?.desktop?.page,
+      }));
+      _currentScanRecord.pool = pool;
+    }
+
     // ---------- PHASE 8: emit ----------
     setPhase(8, "active");
     logLine("▸ surfacing discovered correlations…", "head");
@@ -2693,8 +3576,11 @@ async function runScan(rawQuery) {
         source: "scanned",
         a_url: seedArticle?.content_urls?.desktop?.page,
         b_url: c.url,
+        scanRecordId: _currentScanRecord?.id || null,
       };
+      item.id = newId();
       state.feed.unshift(item);
+      if (_currentScanRecord) _currentScanRecord.emittedIds.push(item.id);
       render();
       streamItem(item);
       logLine(`▸ EMIT: ${c.partner} (r≈${c.strength.toFixed(2)}, via ${c.kind})`, "emit");
@@ -2703,6 +3589,14 @@ async function runScan(rawQuery) {
     setPhase(8, "done", `${emitted} emitted`);
 
     logLine(`scan complete — ${emitted} correlations added to feed`, "good");
+
+    // Persist the scan record (for logged-in users)
+    if (_currentScanRecord && isLoggedIn()) {
+      _currentScanRecord.durationMs = Date.now() - _currentScanRecord.startedAt;
+      _currentScanRecord.log = _currentScanLog || [];
+      saveScanRecord(_currentScanRecord);
+      renderScansList();
+    }
   } catch (e) {
     logLine(`fatal scan error: ${e.message}`, "bad");
   } finally {
@@ -2712,7 +3606,317 @@ async function runScan(rawQuery) {
     document.getElementById("scan-launch").classList.remove("active");
     document.getElementById("scan-go").disabled = false;
     document.getElementById("scan-panel").classList.remove("scanning");
+    _currentScanLog = null;
+    _currentScanRecord = null;
   }
+}
+
+// =====================================================================
+// SCAN HISTORY (persisted per user, capped at 50 most recent)
+// =====================================================================
+function loadScans() {
+  try { return JSON.parse(localStorage.getItem(userKey("scans")) || "[]"); }
+  catch { return []; }
+}
+function saveScans(arr) {
+  localStorage.setItem(userKey("scans"), JSON.stringify(arr));
+}
+function saveScanRecord(rec) {
+  const all = loadScans();
+  all.unshift(rec);
+  saveScans(all.slice(0, 50));
+}
+function deleteScanRecord(id) {
+  saveScans(loadScans().filter(r => r.id !== id));
+  renderScansList();
+}
+
+function fmtAge(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+function openScanRecord(id) {
+  const rec = loadScans().find(r => r.id === id);
+  if (!rec) { toast("Scan no longer in history", "warn"); return; }
+  // Open scan panel and replay the saved log into it
+  const panel = document.getElementById("scan-panel");
+  panel.classList.add("open");
+  panel.setAttribute("aria-hidden", "false");
+  document.getElementById("scan-input").value = rec.query;
+  document.getElementById("scan-status").style.display = "block";
+  clearLog();
+  const logEl = document.getElementById("scan-log");
+  (rec.log || []).forEach(ln => {
+    const div = document.createElement("div");
+    div.className = `ln ${ln.level || "info"}`;
+    div.innerHTML = `<span class="ts">${ln.ts}</span>${escapeHtml(ln.msg)}`;
+    logEl.appendChild(div);
+  });
+  // mark all phases done
+  resetPhases();
+  PHASE_DEFS.forEach((_, i) => setPhase(i, "done", "✓"));
+  setScanState("archived");
+  document.getElementById("scan-elapsed").textContent =
+    `archived · ${fmtAge(rec.startedAt)}`;
+  // stream the emitted records (best-effort: their original card may not be in feed anymore)
+  const stream = document.getElementById("scan-stream");
+  stream.innerHTML = "";
+  (rec.pool || []).slice(0, 12).forEach(c => {
+    const el = document.createElement("div");
+    el.className = "stream-item";
+    el.innerHTML = `<span class="pair">${escapeHtml(c.partner)}</span><span class="r">r≈${(c.strength || 0).toFixed(2)}</span>`;
+    stream.appendChild(el);
+  });
+  if ((rec.pool || []).length === 0) {
+    stream.innerHTML = `<div class="scan-stream-empty">no candidates persisted</div>`;
+  }
+}
+
+function replayScan(id) {
+  const rec = loadScans().find(r => r.id === id);
+  if (!rec) return;
+  document.getElementById("scan-panel").classList.add("open");
+  document.getElementById("scan-panel").setAttribute("aria-hidden", "false");
+  document.getElementById("scan-input").value = rec.query;
+  runScan(rec.query);
+}
+
+function dropScanAsCluster(id) {
+  if (!isLoggedIn()) { toast("Sign in to use Canvas", "warn"); openAuthModal(); return; }
+  const rec = loadScans().find(r => r.id === id);
+  if (!rec) return;
+  loadCanvas();
+
+  const cx = -CANVAS.pan.x + window.innerWidth / 2;
+  const cy = -CANVAS.pan.y + window.innerHeight / 2;
+
+  // Central seed node
+  const seedId = newId();
+  CANVAS.nodes.push({
+    id: seedId,
+    x: cx - 100, y: cy - 25,
+    kind: "scan-seed",
+    title: `scan · ${fmtAge(rec.startedAt)}`,
+    text: rec.query,
+    scanRecordId: rec.id,
+  });
+
+  // Radial arrangement of pool candidates
+  const pool = (rec.pool || []).slice(0, 9);
+  const radius = 260;
+  pool.forEach((c, i) => {
+    const angle = (i / pool.length) * Math.PI * 2 - Math.PI / 2;
+    const nx = cx + Math.cos(angle) * radius - 100;
+    const ny = cy + Math.sin(angle) * radius - 25;
+    const candidateId = newId();
+    CANVAS.nodes.push({
+      id: candidateId,
+      x: nx, y: ny,
+      kind: "correlation",
+      title: `${c.kind} · r≈${(c.strength || 0).toFixed(2)}`,
+      text: `${rec.seedArticle?.title || rec.query}  ↔  ${c.partner}`,
+      snapshot: {
+        a: rec.seedArticle?.title || rec.query,
+        b: c.partner,
+        strength: c.strength || 0,
+        source: "scanned",
+        domains: ["scanned"],
+        summary: `Surfaced via ${c.kind} during the "${rec.query}" scan. ${c.extract ? c.extract.slice(0, 130) + "…" : ""}`,
+        why: `From scan "${rec.query}" · pairing kind: ${c.kind}`,
+        a_url: rec.seedArticle?.url || null,
+        b_url: c.url || null,
+        sourceCardTitle: `${rec.seedArticle?.title || rec.query} ↔ ${c.partner}`,
+        scanRecordId: rec.id,
+        note: null,
+      },
+    });
+    CANVAS.edges.push({ id: newId(), from: seedId, to: candidateId });
+  });
+
+  saveCanvas();
+  renderCanvas();
+  renderCanvasSwitcher();
+  openCanvas();
+  toast(`▸ Dropped "${rec.query}" cluster (${pool.length + 1} nodes) on "${CANVAS.activeName}"`);
+}
+
+function renderScansList() {
+  const section = document.getElementById("scans-section");
+  const list = document.getElementById("scans-list");
+  const count = document.getElementById("scans-count");
+  if (!section || !list) return;
+  if (!isLoggedIn()) { section.style.display = "none"; return; }
+  const scans = loadScans();
+  section.style.display = scans.length === 0 ? "none" : "block";
+  count.textContent = scans.length;
+  list.innerHTML = "";
+  if (scans.length === 0) return;
+  scans.forEach(rec => {
+    const row = document.createElement("div");
+    row.className = "sidebar-row";
+    row.innerHTML = `
+      <div class="row-title">${escapeHtml(rec.query)}</div>
+      <div class="row-sub">
+        <span>${fmtAge(rec.startedAt)}</span>
+        <span>·</span>
+        <span>${(rec.emittedIds || []).length} emit · ${(rec.pool || []).length} cand</span>
+      </div>
+      <div class="row-actions">
+        <button title="Open archived scan" data-act="open">▸</button>
+        <button title="Drop as cluster on Canvas" data-act="drop">⊞</button>
+        <button title="Re-run scan" data-act="replay">↻</button>
+        <button title="Delete" class="danger" data-act="del">×</button>
+      </div>
+    `;
+    row.querySelector('[data-act="open"]').addEventListener("click", e => { e.stopPropagation(); openScanRecord(rec.id); });
+    row.querySelector('[data-act="drop"]').addEventListener("click", e => { e.stopPropagation(); dropScanAsCluster(rec.id); });
+    row.querySelector('[data-act="replay"]').addEventListener("click", e => { e.stopPropagation(); replayScan(rec.id); });
+    row.querySelector('[data-act="del"]').addEventListener("click", e => { e.stopPropagation(); deleteScanRecord(rec.id); });
+    row.addEventListener("click", () => openScanRecord(rec.id));
+    list.appendChild(row);
+  });
+}
+
+// =====================================================================
+// FAVORITES LIST (sidebar)
+// =====================================================================
+function renderFavoritesList() {
+  const section = document.getElementById("favorites-section");
+  const list = document.getElementById("favorites-list");
+  const count = document.getElementById("favorites-count");
+  if (!section || !list) return;
+  if (!isLoggedIn()) { section.style.display = "none"; return; }
+  const favs = loadFavorites();
+  section.style.display = favs.length === 0 ? "none" : "block";
+  count.textContent = favs.length;
+  list.innerHTML = "";
+  if (favs.length === 0) {
+    list.innerHTML = `<div class="sidebar-list-empty">no favorites yet — click ★ on any card</div>`;
+    return;
+  }
+  favs.forEach(f => {
+    const row = document.createElement("div");
+    row.className = "sidebar-row";
+    const rClass = f.strength < 0 ? "neg" : "";
+    row.innerHTML = `
+      <div class="row-title">${escapeHtml(f.title)}</div>
+      <div class="row-sub">
+        <span class="r ${rClass}">r≈${(f.strength || 0).toFixed(2)}</span>
+        <span>·</span>
+        <span>${escapeHtml(f.source || "curated")}</span>
+      </div>
+      <div class="row-actions">
+        <button title="Add to active Canvas" data-act="canvas">⊞</button>
+        <button title="Remove favorite" class="danger" data-act="del">×</button>
+      </div>
+    `;
+    row.querySelector('[data-act="canvas"]').addEventListener("click", e => {
+      e.stopPropagation();
+      addCardToCanvas(f);
+    });
+    row.querySelector('[data-act="del"]').addEventListener("click", e => {
+      e.stopPropagation();
+      const arr = loadFavorites().filter(x => x.title !== f.title);
+      saveFavorites(arr);
+      renderFavoritesList();
+      render();
+      toast("× Removed favorite");
+    });
+    row.addEventListener("click", () => {
+      // Jump to it in feed if present
+      const present = state.feed.find(x => x.title === f.title);
+      if (present) jumpToCardInFeed(f.title);
+      else toast("Not in current feed — open the source via investigate links", "warn");
+    });
+    list.appendChild(row);
+  });
+}
+
+function dropAllFavoritesOnCanvas() {
+  if (!isLoggedIn()) { openAuthModal(); return; }
+  const favs = loadFavorites();
+  if (favs.length === 0) { toast("No favorites yet"); return; }
+  loadCanvas();
+  const cx = -CANVAS.pan.x + window.innerWidth / 2;
+  const cy = -CANVAS.pan.y + window.innerHeight / 2;
+  const radius = 280;
+  favs.forEach((f, i) => {
+    const angle = (i / favs.length) * Math.PI * 2;
+    const nx = cx + Math.cos(angle) * radius - 100;
+    const ny = cy + Math.sin(angle) * radius - 25;
+    CANVAS.nodes.push({
+      id: newId(),
+      x: nx, y: ny,
+      kind: "correlation",
+      title: `${f.source || "curated"} · r≈${(f.strength || 0).toFixed(2)}`,
+      text: `${f.a}  ↔  ${f.b}`,
+      snapshot: snapshotFromItem(f),
+    });
+  });
+  saveCanvas();
+  renderCanvas();
+  renderCanvasSwitcher();
+  openCanvas();
+  toast(`⊞ Dropped ${favs.length} favorites on "${CANVAS.activeName}"`);
+}
+
+// =====================================================================
+// CANVAS EXPORT / IMPORT
+// =====================================================================
+function exportCanvas() {
+  if (!isLoggedIn() || !CANVAS.activeName) { openAuthModal(); return; }
+  const payload = {
+    app: "CORR.AI",
+    schemaVersion: 1,
+    exportedAt: Date.now(),
+    canvasName: CANVAS.activeName,
+    nodes: CANVAS.nodes,
+    edges: CANVAS.edges,
+    pan: CANVAS.pan, zoom: CANVAS.zoom,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const safe = CANVAS.activeName.replace(/[^a-z0-9\-_]+/gi, "-").toLowerCase();
+  a.href = url;
+  a.download = `corr.ai-canvas-${safe}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`▸ Exported "${CANVAS.activeName}"`);
+}
+
+function importCanvasFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (data.app !== "CORR.AI" || !Array.isArray(data.nodes)) {
+        toast("Invalid canvas file", "bad"); return;
+      }
+      let name = data.canvasName || "Imported";
+      const all = loadAllCanvases();
+      let n = name, suffix = 1;
+      while (all[n]) { n = `${name} (${++suffix})`; }
+      all[n] = {
+        nodes: data.nodes, edges: data.edges || [],
+        pan: data.pan || { x: 200, y: 100 }, zoom: data.zoom || 1,
+        createdAt: Date.now(), updatedAt: Date.now(),
+      };
+      saveAllCanvases(all);
+      setActiveCanvasName(n);
+      loadCanvas();
+      renderCanvas();
+      renderCanvasSwitcher();
+      toast(`▸ Imported as "${n}"`);
+    } catch (e) {
+      toast("Failed to parse canvas file: " + e.message, "bad");
+    }
+  };
+  reader.readAsText(file);
 }
 
 function wireScan() {
@@ -2776,6 +3980,12 @@ function wireFeedActions() {
       addCardToCanvas(item);
       return;
     }
+    if (action === "note") {
+      btn.classList.add("pop");
+      setTimeout(() => btn.classList.remove("pop"), 400);
+      openNoteEditor(item);
+      return;
+    }
   });
 }
 
@@ -2788,6 +3998,8 @@ function init() {
   wireScan();
   wireFeedActions();
   wireCanvas();
+  renderFavoritesList();
+  renderScansList();
   document.getElementById("discover").addEventListener("click", discoverNew);
   document.getElementById("reseed").addEventListener("click", reseed);
   reseed();
