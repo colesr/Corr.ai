@@ -116,6 +116,8 @@
     border: 1px solid var(--line); padding: 4px 9px; border-radius: 999px;
     font-size: 11px; color: var(--ink-dim); cursor: pointer; user-select: none;
     background: var(--panel-2);
+    transition: font-size 0.25s ease, padding 0.25s ease,
+                color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
   }
   .chip:hover { color: var(--ink); border-color: var(--ink-dim); }
   .chip.on { color: var(--bg); background: var(--accent); border-color: var(--accent); }
@@ -1245,6 +1247,204 @@
     0% { box-shadow: 0 0 0 2px var(--accent-3), 0 0 24px var(--accent-3); }
     100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
   }
+
+  /* ===== canvas head — light sky baby blue palette ===== */
+  .canvas-overlay .canvas-head {
+    background: #d4ebff;
+    border-bottom: 1px solid #93c3e3;
+  }
+  .canvas-overlay .canvas-head h2 {
+    color: #1e4a73;
+  }
+  .canvas-overlay .canvas-head .canvas-meta-inline {
+    color: #4d7396;
+  }
+  .canvas-overlay .canvas-head .canvas-tool,
+  .canvas-overlay .canvas-head .canvas-close,
+  .canvas-overlay .canvas-head .canvas-switcher-btn {
+    background: #ebf6ff;
+    border: 1px solid #9bc8e8;
+    color: #1e4a73;
+    transition:
+      transform 0.22s cubic-bezier(.2,.9,.3,1.35),
+      background 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease,
+      box-shadow 0.24s ease;
+    transform-origin: center;
+    will-change: transform, box-shadow;
+  }
+  .canvas-overlay .canvas-head .canvas-tool:hover,
+  .canvas-overlay .canvas-head .canvas-close:hover,
+  .canvas-overlay .canvas-head .canvas-switcher-btn:hover {
+    background: #c4def5;
+    border-color: #5b94c4;
+    color: #0d2b4a;
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 6px 18px rgba(91, 148, 196, 0.45);
+  }
+  .canvas-overlay .canvas-head .canvas-tool:active,
+  .canvas-overlay .canvas-head .canvas-close:active,
+  .canvas-overlay .canvas-head .canvas-switcher-btn:active {
+    transform: translateY(-1px) scale(0.95);
+    box-shadow: 0 2px 6px rgba(91, 148, 196, 0.35);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .canvas-overlay .canvas-head .canvas-tool.active {
+    background: #3d8cc8;
+    color: #fff;
+    border-color: #2e6d9e;
+    box-shadow: 0 2px 8px rgba(61, 140, 200, 0.5);
+  }
+  .canvas-overlay .canvas-head .canvas-tool.active:hover {
+    background: #5da4d8;
+    color: #fff;
+    border-color: #3d8cc8;
+    box-shadow: 0 6px 20px rgba(61, 140, 200, 0.55);
+  }
+  /* Delete + Clear keep their red hover treatment */
+  .canvas-overlay .canvas-head .canvas-tool.danger:hover {
+    background: #ffe2e8;
+    color: var(--bad);
+    border-color: var(--bad);
+    box-shadow: 0 6px 18px rgba(255, 92, 122, 0.45);
+  }
+  .canvas-overlay .canvas-head .canvas-switcher-btn .caret {
+    color: #5a89ad;
+  }
+
+  /* ===== canvas opening transitional animation ===== */
+  .canvas-overlay.open {
+    animation: canvasFadeIn 0.22s ease;
+  }
+  .canvas-overlay.open .canvas-head {
+    animation: canvasHeadSlide 0.38s cubic-bezier(.2,.9,.3,1.1) backwards;
+  }
+  .canvas-overlay.open .canvas-workspace {
+    animation: canvasBoardIn 0.48s cubic-bezier(.25,.7,.35,1) 0.12s backwards;
+  }
+  @keyframes canvasFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes canvasHeadSlide {
+    from { transform: translateY(-100%); opacity: 0.4; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+  @keyframes canvasBoardIn {
+    from {
+      opacity: 0;
+      transform: scale(0.985);
+      filter: blur(2px);
+    }
+    to   {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+    }
+  }
+  @keyframes canvasItemPop {
+    from {
+      transform: translateY(-10px) scale(0.88);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* ===== close button — unique, higher-impact treatment ===== */
+  .canvas-overlay .canvas-head #canvas-close {
+    transition:
+      transform 0.32s cubic-bezier(.2,.9,.3,1.55),
+      background 0.25s ease,
+      border-color 0.25s ease,
+      color 0.25s ease,
+      box-shadow 0.32s ease;
+    position: relative;
+    font-weight: 600;
+  }
+  .canvas-overlay .canvas-head #canvas-close:hover {
+    background: #ffe2e8;
+    color: var(--bad);
+    border-color: var(--bad);
+    transform: translateY(-5px) scale(1.18) rotate(-5deg);
+    box-shadow:
+      0 12px 28px rgba(255, 92, 122, 0.55),
+      0 0 0 4px rgba(255, 92, 122, 0.15);
+  }
+  .canvas-overlay .canvas-head #canvas-close:active {
+    transform: translateY(-1px) scale(0.9) rotate(0deg);
+    box-shadow: 0 3px 8px rgba(255, 92, 122, 0.4);
+    transition: transform 0.09s ease, box-shadow 0.09s ease;
+  }
+  .canvas-overlay .canvas-head #canvas-close::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    pointer-events: none;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+  }
+  .canvas-overlay .canvas-head #canvas-close:hover::after {
+    border-color: rgba(255, 92, 122, 0.45);
+    transform: scale(1.18) rotate(-5deg);
+    animation: closeRing 1.2s ease-in-out infinite;
+  }
+  @keyframes closeRing {
+    0%, 100% { opacity: 0.6; transform: scale(1.18) rotate(-5deg); }
+    50%      { opacity: 1;   transform: scale(1.28) rotate(-5deg); }
+  }
+  /* Special entrance: slides in from the right with rotation */
+  @keyframes canvasCloseIn {
+    from {
+      transform: translateX(60px) scale(0.5) rotate(20deg);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0) scale(1) rotate(0);
+      opacity: 1;
+    }
+  }
+
+  /* ===== export-format dropdown ===== */
+  .canvas-export-wrap { position: relative; }
+  .canvas-export-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 260px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.6);
+    padding: 6px;
+    z-index: 60;
+    animation: menuDrop 0.22s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes menuDrop {
+    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  .canvas-export-menu .csm-action {
+    width: 100%; background: transparent; border: 1px solid transparent;
+    color: var(--ink); font-family: inherit; font-size: 12px;
+    text-align: left; padding: 8px 11px; border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  }
+  .canvas-export-menu .csm-action:hover {
+    background: var(--panel-2); border-color: var(--line);
+    color: var(--accent);
+    transform: translateX(2px);
+  }
+  .canvas-export-menu .csm-label {
+    font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 11px 6px;
+  }
 </style>
 </head>
 <body>
@@ -1408,7 +1608,17 @@
     </div>
     <span class="grow"></span>
     <span class="canvas-meta-inline" id="canvas-meta-inline"></span>
-    <button class="canvas-close" id="canvas-export" title="Export this canvas as JSON">▸ Export</button>
+    <div class="canvas-export-wrap">
+      <button class="canvas-close" id="canvas-export" title="Export this canvas">▸ Export <span class="caret">▾</span></button>
+      <div class="canvas-export-menu" id="canvas-export-menu" style="display:none;">
+        <div class="csm-label">export format</div>
+        <button class="csm-action" data-fmt="json">JSON · full editable data</button>
+        <button class="csm-action" data-fmt="xml">XML · structured data</button>
+        <button class="csm-action" data-fmt="svg">SVG · vector image</button>
+        <button class="csm-action" data-fmt="png">PNG · raster image</button>
+        <button class="csm-action" data-fmt="pdf">PDF · printable</button>
+      </div>
+    </div>
     <button class="canvas-close" id="canvas-import" title="Import a canvas JSON file">▸ Import</button>
     <input type="file" id="canvas-import-file" accept="application/json,.json" style="display:none;" />
     <button class="canvas-close" id="canvas-close">× Close</button>
@@ -1478,10 +1688,7 @@
 <div class="toast-tray" id="toast-tray"></div>
 
 <footer>
-  CORR.AI is a single-file research toy. Correlation ≠ causation. Always investigate.
-  <br/>
-  Curated archive sourced from public datasets (Tyler Vigen's <i>Spurious Correlations</i>,
-  published studies, historical record). Live pairings via the Wikipedia REST API.
+  CORR.AI is a research platform. Correlation ≠ causation.
 </footer>
 
 <script>
@@ -2044,7 +2251,7 @@ function updateAuthUI() {
   const canvasBtn = document.getElementById("canvas-btn");
   if (AUTH.user) {
     btn.classList.add("authed");
-    label.textContent = `▸ ${AUTH.user.username}`;
+    label.textContent = AUTH.user.username;
     btn.title = "Account · click to view or sign out";
     canvasBtn.style.display = "inline-flex";
   } else {
@@ -2481,6 +2688,34 @@ function openCanvas() {
   loadCanvas();
   document.getElementById("canvas-overlay").classList.add("open");
   renderCanvas();
+  animateCanvasOpen();
+}
+
+function animateCanvasOpen() {
+  const head = document.querySelector(".canvas-overlay.open .canvas-head");
+  if (!head) return;
+  // Build an ordered list of head items to stagger-pop in
+  const items = [
+    head.querySelector("h2"),
+    head.querySelector(".canvas-switcher"),
+    ...head.querySelectorAll(".canvas-toolbar > button"),
+    head.querySelector(".canvas-meta-inline"),
+    document.getElementById("canvas-export"),
+    document.getElementById("canvas-import"),
+    document.getElementById("canvas-close"),
+  ].filter(Boolean);
+  items.forEach((el, i) => {
+    el.style.animation = "none";
+    void el.offsetWidth; // force restart
+    if (el.id === "canvas-close") {
+      // unique, slightly more dramatic entrance: slides from the right with rotation
+      el.style.animation =
+        `canvasCloseIn 0.55s cubic-bezier(.2,.9,.3,1.5) ${0.18 + i * 0.035}s backwards`;
+    } else {
+      el.style.animation =
+        `canvasItemPop 0.36s cubic-bezier(.2,.9,.3,1.25) ${0.14 + i * 0.035}s backwards`;
+    }
+  });
 }
 function closeCanvas() {
   document.getElementById("canvas-overlay").classList.remove("open");
@@ -2978,7 +3213,26 @@ function wireCanvas() {
   document.getElementById("ndp-close").addEventListener("click", closeNodeDetails);
 
   // ---------- export / import ----------
-  document.getElementById("canvas-export").addEventListener("click", exportCanvas);
+  const exportBtn = document.getElementById("canvas-export");
+  const exportMenu = document.getElementById("canvas-export-menu");
+  exportBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = exportMenu.style.display === "block";
+    exportMenu.style.display = open ? "none" : "block";
+  });
+  exportMenu.querySelectorAll("[data-fmt]").forEach(b => {
+    b.addEventListener("click", () => {
+      const fmt = b.dataset.fmt;
+      exportMenu.style.display = "none";
+      exportCanvas(fmt);
+    });
+  });
+  document.addEventListener("click", (e) => {
+    if (!exportMenu.contains(e.target) && e.target !== exportBtn && !exportBtn.contains(e.target)) {
+      exportMenu.style.display = "none";
+    }
+  });
+
   document.getElementById("canvas-import").addEventListener("click", () => {
     document.getElementById("canvas-import-file").click();
   });
@@ -3089,6 +3343,7 @@ function readCard(id) {
 
 function render() {
   ensureIds();
+  updateSourceChipSizes();
   const feedEl = document.getElementById("feed");
 
   // trigger scan-line sweep across the top of the feed area
@@ -3163,7 +3418,24 @@ function buildDomainCloud() {
     // entrance stagger
     bubble.style.animation = `cardEnter 0.35s ease-out ${Math.min(i * 14, 350)}ms backwards`;
 
-    bubble.addEventListener("click", () => {
+    bubble.addEventListener("click", (e) => {
+      // Ctrl/⌘ + click solo-selects this bubble and deselects all others
+      if (e.ctrlKey || e.metaKey) {
+        state.activeDomains.clear();
+        state.activeDomains.add(d);
+        document.querySelectorAll(".domain-bubble").forEach(b => {
+          b.classList.remove("pop", "dim");
+          void b.offsetWidth;
+          if (b === bubble) {
+            b.classList.add("on", "pop");
+          } else {
+            b.classList.remove("on");
+            b.classList.add("dim");
+          }
+        });
+        render();
+        return;
+      }
       bubble.classList.remove("pop", "dim");
       void bubble.offsetWidth;
       if (bubble.classList.contains("on")) {
@@ -3190,13 +3462,48 @@ function buildDomainCloud() {
 
 function wireSourceChips() {
   document.querySelectorAll("#sources .chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      chip.classList.toggle("on");
+    chip.addEventListener("click", (e) => {
       const s = chip.dataset.src;
+      // Ctrl/⌘ + click solo-selects this source and deselects all others
+      if (e.ctrlKey || e.metaKey) {
+        state.activeSources.clear();
+        state.activeSources.add(s);
+        document.querySelectorAll("#sources .chip").forEach(c => {
+          c.classList.toggle("on", c.dataset.src === s);
+        });
+        render();
+        return;
+      }
+      chip.classList.toggle("on");
       if (chip.classList.contains("on")) state.activeSources.add(s);
       else state.activeSources.delete(s);
       render();
     });
+  });
+}
+
+function updateSourceChipSizes() {
+  // Size each source chip by the number of feed items under that source —
+  // mirrors the domain cloud's frequency-as-size visualization.
+  const counts = { curated: 0, generated: 0, live: 0, scanned: 0 };
+  state.feed.forEach(i => {
+    const s = i.source || "curated";
+    counts[s] = (counts[s] || 0) + 1;
+  });
+  const values = Object.values(counts);
+  const maxC = Math.max(...values, 1);
+  const minC = Math.min(...values, 0);
+  const range = (maxC - minC) || 1;
+  document.querySelectorAll("#sources .chip").forEach(chip => {
+    const s = chip.dataset.src;
+    const c = counts[s] || 0;
+    const ratio = (c - minC) / range;
+    const fontSize = 10 + ratio * 7;       // 10 → 17 px
+    const padX = 8 + ratio * 7;            // 8 → 15 px
+    const padY = 3 + ratio * 3;            // 3 → 6 px
+    chip.style.fontSize = `${fontSize.toFixed(1)}px`;
+    chip.style.padding = `${padY.toFixed(1)}px ${padX.toFixed(1)}px`;
+    chip.title = `${s} — ${c} card${c === 1 ? "" : "s"}`;
   });
 }
 
@@ -3867,26 +4174,237 @@ function dropAllFavoritesOnCanvas() {
 // =====================================================================
 // CANVAS EXPORT / IMPORT
 // =====================================================================
-function exportCanvas() {
-  if (!isLoggedIn() || !CANVAS.activeName) { openAuthModal(); return; }
-  const payload = {
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function escapeXml(s) {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+// ---------- format builders ----------
+function canvasJsonPayload() {
+  return {
     app: "CORR.AI",
     schemaVersion: 1,
     exportedAt: Date.now(),
     canvasName: CANVAS.activeName,
     nodes: CANVAS.nodes,
     edges: CANVAS.edges,
-    pan: CANVAS.pan, zoom: CANVAS.zoom,
+    pan: CANVAS.pan,
+    zoom: CANVAS.zoom,
   };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+}
+
+function canvasToXml() {
+  const lines = [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<canvas app="CORR.AI" schemaVersion="1" name="${escapeXml(CANVAS.activeName)}" exportedAt="${Date.now()}">`,
+    `  <nodes>`,
+  ];
+  CANVAS.nodes.forEach(n => {
+    lines.push(`    <node id="${escapeXml(n.id)}" kind="${escapeXml(n.kind)}" x="${n.x}" y="${n.y}">`);
+    if (n.title) lines.push(`      <title>${escapeXml(n.title)}</title>`);
+    if (n.text)  lines.push(`      <text>${escapeXml(n.text)}</text>`);
+    if (n.snapshot) {
+      const s = n.snapshot;
+      lines.push(`      <snapshot a="${escapeXml(s.a)}" b="${escapeXml(s.b)}" strength="${s.strength}" source="${escapeXml(s.source)}">`);
+      if (s.domains && s.domains.length) {
+        lines.push(`        <domains>${s.domains.map(d => `<d>${escapeXml(d)}</d>`).join("")}</domains>`);
+      }
+      if (s.summary) lines.push(`        <summary>${escapeXml(s.summary)}</summary>`);
+      if (s.why)     lines.push(`        <why>${escapeXml(s.why)}</why>`);
+      if (s.note)    lines.push(`        <note>${escapeXml(s.note)}</note>`);
+      if (s.a_url)   lines.push(`        <a_url>${escapeXml(s.a_url)}</a_url>`);
+      if (s.b_url)   lines.push(`        <b_url>${escapeXml(s.b_url)}</b_url>`);
+      if (s.sourceCardTitle) lines.push(`        <sourceCardTitle>${escapeXml(s.sourceCardTitle)}</sourceCardTitle>`);
+      lines.push(`      </snapshot>`);
+    }
+    lines.push(`    </node>`);
+  });
+  lines.push(`  </nodes>`);
+  lines.push(`  <edges>`);
+  CANVAS.edges.forEach(e => {
+    lines.push(`    <edge id="${escapeXml(e.id)}" from="${escapeXml(e.from)}" to="${escapeXml(e.to)}" />`);
+  });
+  lines.push(`  </edges>`);
+  lines.push(`</canvas>`);
+  return lines.join("\n");
+}
+
+function canvasToSvg() {
+  const NODE_W = 220, NODE_H = 64, PAD = 50;
+  if (CANVAS.nodes.length === 0) {
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200" viewBox="0 0 600 200"><rect width="100%" height="100%" fill="#0c0d10"/><text x="300" y="105" font-family="monospace" font-size="14" fill="#8e8d86" text-anchor="middle">(empty canvas)</text></svg>`;
+  }
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  CANVAS.nodes.forEach(n => {
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + NODE_W);
+    maxY = Math.max(maxY, n.y + NODE_H);
+  });
+  const w = (maxX - minX) + PAD * 2;
+  const h = (maxY - minY) + PAD * 2;
+  const offX = -minX + PAD;
+  const offY = -minY + PAD;
+
+  const palette = {
+    rect:        { fill: "#14161b", stroke: "#2a2d36", text: "#e8e6df", title: "#8e8d86" },
+    note:        { fill: "#3b2f1c", stroke: "#ffb454", text: "#e8e6df", title: "#ffb454" },
+    decision:    { fill: "#1b2c39", stroke: "#6ad1ff", text: "#e8e6df", title: "#6ad1ff" },
+    correlation: { fill: "#1b1e25", stroke: "#6ad1ff", text: "#e8e6df", title: "#6ad1ff" },
+    "scan-seed": { fill: "#d6ff5c", stroke: "#d6ff5c", text: "#0c0d10", title: "#0c0d10" },
+  };
+
+  const parts = [];
+  parts.push(`<?xml version="1.0" encoding="UTF-8"?>`);
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`);
+  parts.push(`<rect width="100%" height="100%" fill="#0c0d10"/>`);
+  // subtle dot grid
+  parts.push(`<defs><pattern id="dot" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="0.7" fill="#ffffff" opacity="0.04"/></pattern></defs>`);
+  parts.push(`<rect width="100%" height="100%" fill="url(#dot)"/>`);
+
+  // edges
+  CANVAS.edges.forEach(e => {
+    const a = CANVAS.nodes.find(n => n.id === e.from);
+    const b = CANVAS.nodes.find(n => n.id === e.to);
+    if (!a || !b) return;
+    const ax = a.x + offX + NODE_W / 2, ay = a.y + offY + NODE_H / 2;
+    const bx = b.x + offX + NODE_W / 2, by = b.y + offY + NODE_H / 2;
+    const dx = bx - ax;
+    parts.push(
+      `<path d="M ${ax} ${ay} C ${ax + dx * 0.4} ${ay}, ${bx - dx * 0.4} ${by}, ${bx} ${by}" ` +
+      `stroke="#6ad1ff" stroke-width="1.5" fill="none" opacity="0.7"/>`
+    );
+  });
+
+  // nodes
+  CANVAS.nodes.forEach(n => {
+    const x = n.x + offX, y = n.y + offY;
+    const c = palette[n.kind] || palette.rect;
+    const rxAttr = n.kind === "decision" ? 18 : 4;
+    parts.push(`<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" rx="${rxAttr}" ry="${rxAttr}" fill="${c.fill}" stroke="${c.stroke}" stroke-width="1"/>`);
+    if (n.title) {
+      parts.push(`<text x="${x + 12}" y="${y + 18}" font-family="monospace" font-size="9" fill="${c.title}" font-weight="600">${escapeXml(String(n.title).slice(0, 40))}</text>`);
+    }
+    if (n.text) {
+      const txt = String(n.text).slice(0, 36);
+      parts.push(`<text x="${x + 12}" y="${y + 40}" font-family="monospace" font-size="12" fill="${c.text}">${escapeXml(txt)}</text>`);
+    }
+    if (n.snapshot && n.snapshot.note) {
+      parts.push(`<text x="${x + 12}" y="${y + 56}" font-family="monospace" font-size="9" fill="#ffb454" font-style="italic">🗒 ${escapeXml(String(n.snapshot.note).slice(0, 32))}</text>`);
+    }
+  });
+
+  // footer caption with canvas name
+  parts.push(`<text x="${PAD}" y="${h - 14}" font-family="monospace" font-size="10" fill="#5a5a55" letter-spacing="0.1em">CORR.AI · ${escapeXml(CANVAS.activeName)} · exported ${new Date().toISOString().slice(0,10)}</text>`);
+
+  parts.push(`</svg>`);
+  return parts.join("\n");
+}
+
+function svgToPngBlob(svgString) {
+  return new Promise((resolve, reject) => {
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth || 1200;
+      const h = img.naturalHeight || 800;
+      const canvas = document.createElement("canvas");
+      canvas.width = w * 2;   // 2x for crispness
+      canvas.height = h * 2;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(2, 2);
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob => resolve(blob), "image/png");
+    };
+    img.onerror = (e) => {
+      URL.revokeObjectURL(url);
+      reject(e);
+    };
+    img.src = url;
+  });
+}
+
+function exportCanvasAsPdfViaPrint() {
+  const svg = canvasToSvg();
+  const win = window.open("", "corr.ai-canvas-pdf", "width=1100,height=800");
+  if (!win) { toast("Pop-up blocked — allow pop-ups to export as PDF", "bad"); return; }
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>CORR.AI Canvas — ${escapeHtml(CANVAS.activeName)}</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #0c0d10; }
+  .wrap { padding: 16px; }
+  svg { display: block; max-width: 100%; height: auto; }
+  @media print {
+    @page { margin: 12mm; size: landscape; }
+    body { background: #0c0d10; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .wrap { padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">${svg}</div>
+<script>
+  window.addEventListener("load", function() { setTimeout(function() { window.print(); }, 200); });
+<\/script>
+</body>
+</html>`);
+  win.document.close();
+}
+
+async function exportCanvas(fmt = "json") {
+  if (!isLoggedIn() || !CANVAS.activeName) { openAuthModal(); return; }
   const safe = CANVAS.activeName.replace(/[^a-z0-9\-_]+/gi, "-").toLowerCase();
-  a.href = url;
-  a.download = `corr.ai-canvas-${safe}-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast(`▸ Exported "${CANVAS.activeName}"`);
+  const date = new Date().toISOString().slice(0, 10);
+  const baseName = `corr.ai-canvas-${safe}-${date}`;
+
+  try {
+    if (fmt === "json") {
+      const blob = new Blob([JSON.stringify(canvasJsonPayload(), null, 2)], { type: "application/json" });
+      triggerDownload(blob, `${baseName}.json`);
+    } else if (fmt === "xml") {
+      const blob = new Blob([canvasToXml()], { type: "application/xml" });
+      triggerDownload(blob, `${baseName}.xml`);
+    } else if (fmt === "svg") {
+      const blob = new Blob([canvasToSvg()], { type: "image/svg+xml" });
+      triggerDownload(blob, `${baseName}.svg`);
+    } else if (fmt === "png") {
+      toast("Rendering PNG…");
+      const blob = await svgToPngBlob(canvasToSvg());
+      if (!blob) { toast("PNG render failed", "bad"); return; }
+      triggerDownload(blob, `${baseName}.png`);
+    } else if (fmt === "pdf") {
+      exportCanvasAsPdfViaPrint();
+      toast(`▸ Print dialog opening — choose "Save as PDF"`);
+      return;
+    } else {
+      toast(`Unknown format: ${fmt}`, "bad");
+      return;
+    }
+    toast(`▸ Exported "${CANVAS.activeName}" · ${fmt.toUpperCase()}`);
+  } catch (e) {
+    toast(`Export failed: ${e.message}`, "bad");
+  }
 }
 
 function importCanvasFile(file) {
