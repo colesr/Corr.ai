@@ -1478,6 +1478,7 @@
     padding: 4px 11px 6px;
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -1724,6 +1725,17 @@
 </footer>
 
 <script>
+// =====================================================================
+// SUPABASE CONFIG
+// The anon key is safe in client code — Row Level Security on the
+// server is what protects user data.
+// =====================================================================
+const SUPABASE_URL = "https://bjzsnwzvlooxcajgaduw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqenNud3p2bG9veGNhamdhZHV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNjc3NTMsImV4cCI6MjA5NjY0Mzc1M30.7QsjO_acN5LAuFLPTNREJ7pMaeUhPxccVeLCp6q5LLk";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true },
+});
+
 // =====================================================================
 // CURATED ARCHIVE — real, famous, well-documented odd correlations
 // =====================================================================
@@ -2243,38 +2255,62 @@ function ensureIds() {
 }
 
 // =====================================================================
-// AUTH (localStorage only — there is no backend; passwords are stored
-// in plaintext locally. This is honest about the standalone-file
-// constraint and clearly stated to the user in the modal note.)
+// AUTH (Supabase-backed). AUTH.user is shaped { id, email, username }
+// where `username` is the user's display_name from the profiles table.
+// `anonymous` is a local flag for "browse without an account."
 // =====================================================================
 const AUTH = {
-  user: null,     // { username } when signed in, null when anon/logged out
+  user: null,
   anonymous: false,
+  ready: false,
 };
 
-function loadAuth() {
+async function loadAuth() {
   try {
-    const raw = localStorage.getItem("corr.ai:session");
-    if (raw) {
-      const s = JSON.parse(raw);
-      if (s.username) AUTH.user = { username: s.username };
-      if (s.anonymous) AUTH.anonymous = true;
-    }
+    if (localStorage.getItem("corr.ai:anon") === "1") AUTH.anonymous = true;
   } catch (e) {}
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    await hydrateAuthFromSession(session);
+    AUTH.anonymous = false;
+    saveAnonFlag();
+  }
+  AUTH.ready = true;
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session) {
+      await hydrateAuthFromSession(session);
+      updateAuthUI();
+    } else if (event === "SIGNED_OUT") {
+      AUTH.user = null;
+      updateAuthUI();
+    }
+  });
 }
-function saveAuth() {
-  localStorage.setItem("corr.ai:session", JSON.stringify({
-    username: AUTH.user?.username || null,
-    anonymous: AUTH.anonymous,
-  }));
+
+async function hydrateAuthFromSession(session) {
+  let displayName = session.user.email?.split("@")[0] || "user";
+  try {
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("display_name")
+      .eq("id", session.user.id)
+      .maybeSingle();
+    if (profile?.display_name) displayName = profile.display_name;
+  } catch (e) {}
+  AUTH.user = {
+    id: session.user.id,
+    email: session.user.email,
+    username: displayName,
+  };
 }
-function getCredsMap() {
-  try { return JSON.parse(localStorage.getItem("corr.ai:creds") || "{}"); }
-  catch { return {}; }
+
+function saveAnonFlag() {
+  if (AUTH.anonymous) localStorage.setItem("corr.ai:anon", "1");
+  else localStorage.removeItem("corr.ai:anon");
 }
-function saveCredsMap(m) {
-  localStorage.setItem("corr.ai:creds", JSON.stringify(m));
-}
+
 function isLoggedIn() { return !!AUTH.user; }
 
 function updateAuthUI() {
@@ -2317,9 +2353,14 @@ function renderAuthForm(body, title, mode) {
       <button class="modal-tab ${mode === "register" ? "active" : ""}" data-mode="register">Create</button>
     </div>
     <div class="modal-field">
-      <label>username</label>
-      <input id="auth-user" type="text" autocomplete="username" />
+      <label>email</label>
+      <input id="auth-email" type="email" autocomplete="email" />
     </div>
+    ${mode === "register" ? `
+    <div class="modal-field">
+      <label>display name</label>
+      <input id="auth-name" type="text" autocomplete="nickname" />
+    </div>` : ""}
     <div class="modal-field">
       <label>password</label>
       <input id="auth-pass" type="password" autocomplete="${mode === "register" ? "new-password" : "current-password"}" />
@@ -2332,13 +2373,10 @@ function renderAuthForm(body, title, mode) {
     <p class="modal-note">
       Anonymous mode keeps you in the feed and lets you Like / Dislike,
       but Favorites and the Smart Canvas need an account so your work
-      persists across sessions.
-      <br/><br/>
-      <span style="opacity:0.7">Note: this is a single-file app. Credentials are
-      stored in your browser's localStorage only — there is no server.</span>
+      syncs across sessions and devices.
     </p>
   `;
-  setTimeout(() => document.getElementById("auth-user").focus(), 100);
+  setTimeout(() => document.getElementById("auth-email").focus(), 100);
   body.querySelectorAll(".modal-tab").forEach(t => {
     t.addEventListener("click", () => renderAuthForm(body, title, t.dataset.mode));
   });
@@ -2349,36 +2387,67 @@ function renderAuthForm(body, title, mode) {
   document.getElementById("auth-anon").addEventListener("click", () => {
     AUTH.user = null;
     AUTH.anonymous = true;
-    saveAuth();
+    saveAnonFlag();
     updateAuthUI();
     closeAuthModal();
     toast("Browsing anonymously — favorites won't persist", "warn");
   });
 }
 
-function attemptAuth(mode) {
-  const u = document.getElementById("auth-user").value.trim();
-  const p = document.getElementById("auth-pass").value;
+async function attemptAuth(mode) {
+  const email = document.getElementById("auth-email").value.trim();
+  const pass = document.getElementById("auth-pass").value;
+  const name = mode === "register"
+    ? document.getElementById("auth-name").value.trim()
+    : null;
   const err = document.getElementById("auth-err");
-  if (!u || !p) { err.textContent = "username and password required"; return; }
-  if (u.length < 2) { err.textContent = "username must be ≥ 2 chars"; return; }
-  if (p.length < 4) { err.textContent = "password must be ≥ 4 chars"; return; }
-  const creds = getCredsMap();
-  if (mode === "register") {
-    if (creds[u]) { err.textContent = "username already exists"; return; }
-    creds[u] = p;
-    saveCredsMap(creds);
-    AUTH.user = { username: u }; AUTH.anonymous = false;
-    saveAuth(); updateAuthUI(); closeAuthModal();
-    toast(`Account "${u}" created — welcome.`);
-    render();
-  } else {
-    if (!creds[u]) { err.textContent = "no such account"; return; }
-    if (creds[u] !== p) { err.textContent = "incorrect password"; return; }
-    AUTH.user = { username: u }; AUTH.anonymous = false;
-    saveAuth(); updateAuthUI(); closeAuthModal();
-    toast(`Signed in as ${u}`);
-    render();
+  err.textContent = "";
+
+  if (!email || !pass) { err.textContent = "email and password required"; return; }
+  if (mode === "register" && (!name || name.length < 2)) {
+    err.textContent = "display name must be ≥ 2 chars"; return;
+  }
+  if (pass.length < 6) { err.textContent = "password must be ≥ 6 chars"; return; }
+
+  const submit = document.getElementById("auth-submit");
+  const originalLabel = submit.textContent;
+  submit.disabled = true;
+  submit.textContent = "▸ Working…";
+
+  try {
+    if (mode === "register") {
+      const { data, error } = await sb.auth.signUp({
+        email, password: pass,
+        options: { data: { display_name: name } },
+      });
+      if (error) { err.textContent = error.message; return; }
+      if (!data.session) {
+        err.textContent = "Account created — check your email to confirm, then sign in.";
+        return;
+      }
+      await hydrateAuthFromSession(data.session);
+      AUTH.anonymous = false; saveAnonFlag();
+      updateAuthUI(); closeAuthModal();
+      toast(`Account "${AUTH.user.username}" created — welcome.`);
+      await pullUserDataFromCloud();
+      renderFavoritesList();
+      render();
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) { err.textContent = error.message; return; }
+      await hydrateAuthFromSession(data.session);
+      AUTH.anonymous = false; saveAnonFlag();
+      updateAuthUI(); closeAuthModal();
+      toast(`Signed in as ${AUTH.user.username}`);
+      await pullUserDataFromCloud();
+      renderFavoritesList();
+      render();
+    }
+  } catch (e) {
+    err.textContent = e.message || "Unexpected error";
+  } finally {
+    submit.disabled = false;
+    submit.textContent = originalLabel;
   }
 }
 
@@ -2390,11 +2459,20 @@ function renderAccountPanel(body, title) {
   let canvasCount = 0;
   try {
     const raw = localStorage.getItem(userKey("canvas"));
-    if (raw) canvasCount = (JSON.parse(raw).nodes || []).length;
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.nodes)) {
+        canvasCount = data.nodes.length;
+      } else {
+        canvasCount = Object.values(data).reduce(
+          (acc, c) => acc + (c?.nodes?.length || 0), 0);
+      }
+    }
   } catch {}
   body.innerHTML = `
     <div class="modal-user">
       <div>signed in as <span class="uname">${escapeHtml(AUTH.user.username)}</span></div>
+      <div style="font-size:11px;color:var(--ink-dim);margin-top:2px">${escapeHtml(AUTH.user.email || "")}</div>
       <div class="stats">
         <div><b>${favs.length}</b>favorites</div>
         <div><b>${likedCount}</b>liked</div>
@@ -2404,20 +2482,22 @@ function renderAccountPanel(body, title) {
     <button class="modal-submit" id="auth-logout">▸ Sign out</button>
     <button class="modal-anon" id="auth-anon">▸ Continue anonymously</button>
     <p class="modal-note">
-      Signing out keeps your favorites and canvas saved locally — sign back
-      in with the same username and password to restore them.
+      Your favorites and canvases are synced to the cloud — sign back in
+      from any device to restore them.
     </p>
   `;
-  document.getElementById("auth-logout").addEventListener("click", () => {
+  document.getElementById("auth-logout").addEventListener("click", async () => {
+    await sb.auth.signOut();
     AUTH.user = null; AUTH.anonymous = false;
-    saveAuth(); updateAuthUI(); closeAuthModal();
+    saveAnonFlag(); updateAuthUI(); closeAuthModal();
     toast("Signed out");
     render();
     closeCanvas();
   });
-  document.getElementById("auth-anon").addEventListener("click", () => {
+  document.getElementById("auth-anon").addEventListener("click", async () => {
+    await sb.auth.signOut();
     AUTH.user = null; AUTH.anonymous = true;
-    saveAuth(); updateAuthUI(); closeAuthModal();
+    saveAnonFlag(); updateAuthUI(); closeAuthModal();
     toast("Browsing anonymously", "warn");
     render();
     closeCanvas();
@@ -2425,10 +2505,162 @@ function renderAccountPanel(body, title) {
 }
 
 // =====================================================================
-// FAVORITES + PREFERENCES (per-user, in localStorage)
+// CLOUD SYNC — Supabase is the source of truth for signed-in users.
+// localStorage is a per-user cache so the UI loads instantly on boot;
+// load*/save* functions read/write the cache, and mutators (toggleFavorite,
+// setReaction, setNoteFor) fire async writes to Supabase in the background.
+// Anonymous users skip cloud entirely.
+// =====================================================================
+async function pullUserDataFromCloud() {
+  if (!isLoggedIn()) return;
+  const uid = AUTH.user.id;
+  try {
+    const [favsRes, rxnsRes, notesRes] = await Promise.all([
+      sb.from("favorites")
+        .select("item_title, item_data, created_at")
+        .eq("user_id", uid)
+        .order("created_at", { ascending: false }),
+      sb.from("reactions").select("item_title, reaction").eq("user_id", uid),
+      sb.from("notes").select("item_title, note_text").eq("user_id", uid),
+    ]);
+    if (favsRes.error)  throw favsRes.error;
+    if (rxnsRes.error)  throw rxnsRes.error;
+    if (notesRes.error) throw notesRes.error;
+
+    const favs = (favsRes.data || []).map(r => ({
+      ...(r.item_data || {}),
+      title: r.item_title,
+    }));
+    const rxns = {};
+    for (const r of rxnsRes.data || []) rxns[r.item_title] = r.reaction;
+    const notes = {};
+    for (const r of notesRes.data || []) notes[r.item_title] = r.note_text;
+
+    saveFavorites(favs);
+    saveReactions(rxns);
+    saveNotes(notes);
+  } catch (e) {
+    console.warn("[sync] cloud pull failed; using local cache", e);
+  }
+  await pullCanvasesFromCloud();
+}
+
+async function cloudUpsertFavorite(item) {
+  if (!isLoggedIn()) return;
+  const { title, ...rest } = item;
+  const { error } = await sb.from("favorites").upsert({
+    user_id:    AUTH.user.id,
+    item_title: title,
+    item_data:  rest,
+  }, { onConflict: "user_id,item_title" });
+  if (error) console.warn("[sync] favorite upsert failed", error);
+}
+async function cloudRemoveFavorite(title) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("favorites").delete()
+    .eq("user_id", AUTH.user.id).eq("item_title", title);
+  if (error) console.warn("[sync] favorite delete failed", error);
+}
+
+async function cloudUpsertReaction(title, kind) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("reactions").upsert({
+    user_id:    AUTH.user.id,
+    item_title: title,
+    reaction:   kind,
+  }, { onConflict: "user_id,item_title" });
+  if (error) console.warn("[sync] reaction upsert failed", error);
+}
+async function cloudRemoveReaction(title) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("reactions").delete()
+    .eq("user_id", AUTH.user.id).eq("item_title", title);
+  if (error) console.warn("[sync] reaction delete failed", error);
+}
+
+async function cloudUpsertNote(title, text) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("notes").upsert({
+    user_id:    AUTH.user.id,
+    item_title: title,
+    note_text:  text,
+  }, { onConflict: "user_id,item_title" });
+  if (error) console.warn("[sync] note upsert failed", error);
+}
+async function cloudRemoveNote(title) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("notes").delete()
+    .eq("user_id", AUTH.user.id).eq("item_title", title);
+  if (error) console.warn("[sync] note delete failed", error);
+}
+
+// Canvas sync — saveCanvas() is called on every drag, so we debounce
+// the cloud write per canvas name. Create/rename/delete go through
+// immediately.
+const _canvasSyncTimers = {};
+function scheduleCanvasSync(name) {
+  if (!isLoggedIn() || !name) return;
+  if (_canvasSyncTimers[name]) clearTimeout(_canvasSyncTimers[name]);
+  _canvasSyncTimers[name] = setTimeout(() => {
+    delete _canvasSyncTimers[name];
+    const all = loadAllCanvases();
+    if (all[name]) cloudUpsertCanvas(name, all[name]);
+  }, 700);
+}
+async function cloudUpsertCanvas(name, data) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("canvases").upsert({
+    user_id: AUTH.user.id,
+    name,
+    data,
+  }, { onConflict: "user_id,name" });
+  if (error) console.warn("[sync] canvas upsert failed", error);
+}
+async function cloudRenameCanvas(oldName, newName) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("canvases").update({ name: newName })
+    .eq("user_id", AUTH.user.id).eq("name", oldName);
+  if (error) console.warn("[sync] canvas rename failed", error);
+}
+async function cloudDeleteCanvas(name) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("canvases").delete()
+    .eq("user_id", AUTH.user.id).eq("name", name);
+  if (error) console.warn("[sync] canvas delete failed", error);
+}
+async function cloudSetActiveCanvas(name) {
+  if (!isLoggedIn()) return;
+  const { error } = await sb.from("profiles").update({ active_canvas_name: name })
+    .eq("id", AUTH.user.id);
+  if (error) console.warn("[sync] active canvas update failed", error);
+}
+
+async function pullCanvasesFromCloud() {
+  if (!isLoggedIn()) return;
+  const uid = AUTH.user.id;
+  try {
+    const [canvasesRes, profileRes] = await Promise.all([
+      sb.from("canvases").select("name, data").eq("user_id", uid),
+      sb.from("profiles").select("active_canvas_name").eq("id", uid).maybeSingle(),
+    ]);
+    if (canvasesRes.error) throw canvasesRes.error;
+
+    const map = {};
+    for (const r of canvasesRes.data || []) map[r.name] = r.data;
+    saveAllCanvases(map);
+
+    const active = profileRes.data?.active_canvas_name;
+    if (active && map[active]) setActiveCanvasName(active);
+  } catch (e) {
+    console.warn("[sync] canvas pull failed; using local cache", e);
+  }
+}
+
+// =====================================================================
+// FAVORITES + PREFERENCES (cache: localStorage, source of truth: Supabase)
 // =====================================================================
 function userKey(suffix) {
-  const u = AUTH.user?.username || "_anon_";
+  const u = AUTH.user?.id || "_anon_";
   return `corr.ai:${u}:${suffix}`;
 }
 function loadFavorites() {
@@ -2475,14 +2707,17 @@ function toggleFavorite(item) {
   const i = favs.findIndex(f => f.title === item.title);
   if (i >= 0) {
     favs.splice(i, 1);
+    cloudRemoveFavorite(item.title);
     toast(`Removed from favorites`);
   } else {
-    favs.unshift({
+    const fav = {
       title: item.title, a: item.a, b: item.b,
       strength: item.strength, source: item.source,
       domains: item.domains, summary: item.summary,
       savedAt: Date.now(),
-    });
+    };
+    favs.unshift(fav);
+    cloudUpsertFavorite(fav);
     toast(`★ Saved to favorites`);
   }
   saveFavorites(favs);
@@ -2502,6 +2737,7 @@ function setReaction(item, kind) {
   }
   if (prev === kind) {
     delete rxns[item.title]; // toggle off
+    cloudRemoveReaction(item.title);
     toast(`Reaction cleared`);
   } else {
     rxns[item.title] = kind;
@@ -2509,6 +2745,7 @@ function setReaction(item, kind) {
     (item.domains || []).forEach(d => {
       prefs[d] = (prefs[d] || 0) + sign;
     });
+    cloudUpsertReaction(item.title, kind);
     toast(kind === "like" ? "▲ Feed will favor similar topics" : "▼ Feed will avoid similar topics", kind === "dislike" ? "warn" : null);
   }
   saveReactions(rxns);
@@ -2590,17 +2827,20 @@ function loadCanvas() {
   let name = getActiveCanvasName();
   if (!all[name]) {
     if (Object.keys(all).length === 0) {
-      all["Untitled"] = {
+      const defaultCanvas = {
         nodes: [], edges: [],
         pan: { x: 200, y: 100 }, zoom: 1,
         createdAt: Date.now(), updatedAt: Date.now(),
       };
+      all["Untitled"] = defaultCanvas;
       saveAllCanvases(all);
+      cloudUpsertCanvas("Untitled", defaultCanvas);
       name = "Untitled";
     } else {
       name = Object.keys(all)[0];
     }
     setActiveCanvasName(name);
+    cloudSetActiveCanvas(name);
   }
   const c = all[name];
   CANVAS.activeName = name;
@@ -2620,19 +2860,23 @@ function saveCanvas() {
     updatedAt: Date.now(),
   };
   saveAllCanvases(all);
+  scheduleCanvasSync(CANVAS.activeName);
 }
 
 function createCanvas(name) {
   if (!isLoggedIn() || !name) return false;
   const all = loadAllCanvases();
   if (all[name]) { toast(`A canvas named "${name}" already exists`, "warn"); return false; }
-  all[name] = {
+  const newCanvas = {
     nodes: [], edges: [],
     pan: { x: 200, y: 100 }, zoom: 1,
     createdAt: Date.now(), updatedAt: Date.now(),
   };
+  all[name] = newCanvas;
   saveAllCanvases(all);
+  cloudUpsertCanvas(name, newCanvas);
   setActiveCanvasName(name);
+  cloudSetActiveCanvas(name);
   loadCanvas();
   renderCanvas();
   renderCanvasSwitcher();
@@ -2644,6 +2888,7 @@ function switchCanvas(name) {
   if (!isLoggedIn()) return;
   saveCanvas();
   setActiveCanvasName(name);
+  cloudSetActiveCanvas(name);
   loadCanvas();
   renderCanvas();
   renderCanvasSwitcher();
@@ -2656,10 +2901,13 @@ function renameCanvasTo(newName) {
   if (newName === CANVAS.activeName) return true;
   const all = loadAllCanvases();
   if (all[newName]) { toast(`"${newName}" already exists`, "warn"); return false; }
-  all[newName] = all[CANVAS.activeName];
-  delete all[CANVAS.activeName];
+  const oldName = CANVAS.activeName;
+  all[newName] = all[oldName];
+  delete all[oldName];
   saveAllCanvases(all);
+  cloudRenameCanvas(oldName, newName);
   setActiveCanvasName(newName);
+  cloudSetActiveCanvas(newName);
   CANVAS.activeName = newName;
   renderCanvasSwitcher();
   toast(`▸ Renamed to "${newName}"`);
@@ -2673,17 +2921,22 @@ function deleteCurrentCanvas() {
   const all = loadAllCanvases();
   delete all[name];
   saveAllCanvases(all);
+  cloudDeleteCanvas(name);
   const remaining = Object.keys(all);
   if (remaining.length === 0) {
-    all["Untitled"] = {
+    const defaultCanvas = {
       nodes: [], edges: [],
       pan: { x: 200, y: 100 }, zoom: 1,
       createdAt: Date.now(), updatedAt: Date.now(),
     };
+    all["Untitled"] = defaultCanvas;
     saveAllCanvases(all);
+    cloudUpsertCanvas("Untitled", defaultCanvas);
     setActiveCanvasName("Untitled");
+    cloudSetActiveCanvas("Untitled");
   } else {
     setActiveCanvasName(remaining[0]);
+    cloudSetActiveCanvas(remaining[0]);
   }
   loadCanvas();
   renderCanvas();
@@ -2820,8 +3073,10 @@ function setNoteFor(cardTitle, text) {
   const notes = loadNotes();
   if (text && text.trim()) {
     notes[cardTitle] = text.trim();
+    cloudUpsertNote(cardTitle, text.trim());
   } else {
     delete notes[cardTitle];
+    cloudRemoveNote(cardTitle);
   }
   saveNotes(notes);
 }
@@ -4539,8 +4794,8 @@ function wireFeedActions() {
   });
 }
 
-function init() {
-  loadAuth();
+async function init() {
+  await loadAuth();
   updateAuthUI();
   buildDomainCloud();
   wireSourceChips();
@@ -4553,6 +4808,15 @@ function init() {
   document.getElementById("discover").addEventListener("click", discoverNew);
   document.getElementById("reseed").addEventListener("click", reseed);
   reseed();
+
+  // If we restored a session, pull the user's data from Supabase in the
+  // background and refresh anything that depends on it.
+  if (isLoggedIn()) {
+    pullUserDataFromCloud().then(() => {
+      renderFavoritesList();
+      if (typeof render === "function") render();
+    });
+  }
 }
 
 init();
