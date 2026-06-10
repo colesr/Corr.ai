@@ -37,25 +37,33 @@
   header h1 .dot { color: var(--accent-2); }
   header .tag {
     font-size: 12px; letter-spacing: 0.08em;
-    color: transparent;
+    color: var(--ink-dim);
+    position: relative;
+    display: inline-block;
+    cursor: default;
+  }
+  header .tag::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    pointer-events: none;
     background-image: linear-gradient(
       105deg,
-      var(--ink-dim) 0%,
-      var(--ink-dim) 38%,
-      var(--ink) 48%,
-      #ffffff 50%,
-      var(--ink) 52%,
-      var(--ink-dim) 62%,
-      var(--ink-dim) 100%
+      transparent 0%,
+      transparent 42%,
+      rgba(255, 255, 255, 0.95) 50%,
+      transparent 58%,
+      transparent 100%
     );
     background-size: 300% 100%;
     background-position-x: 100%;
     background-repeat: no-repeat;
     background-clip: text;
     -webkit-background-clip: text;
-    cursor: default;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
   }
-  header .tag:hover {
+  header .tag:hover::after {
     animation: tagShimmer 0.95s cubic-bezier(.4, 0, .55, 1);
   }
   @keyframes tagShimmer {
@@ -1475,7 +1483,7 @@
 
 <header>
   <h1>CORR<span class="dot">.</span>AI</h1>
-  <span class="tag">// the correlation engine</span>
+  <span class="tag" data-text="// the correlation engine">// the correlation engine</span>
   <button class="header-btn auth-btn" id="auth-btn" title="Sign in to unlock favorites & canvas">
     <span class="header-btn-dot" id="auth-btn-dot"></span>
     <span id="auth-btn-label">Log in</span>
