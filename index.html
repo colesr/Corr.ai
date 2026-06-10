@@ -1564,11 +1564,11 @@
   </button>
   <span class="grow"></span>
   <span class="status"><span class="pulse"></span>online &middot; <b id="count">0</b> correlations indexed</span>
-  <button class="scan-launch" id="scan-launch" title="Open user scan terminal">
+  <button class="scan-launch" id="scan-launch" title="USER SCAN — search real public sources (Wikipedia, Datamuse, OpenLibrary) for a topic you provide and surface candidate pairings drawn from semantic neighbors, page links, related books, and random sampling. Cards land in the feed tagged as 'scanned' with their source URLs intact for investigation.">
     <span class="scan-launch-dot" id="scan-launch-dot"></span>
     <span>User scan</span>
   </button>
-  <button class="scan-launch ai" id="ai-scan-launch" title="Open AI scan terminal — Llama-generated correlations with a full audit trail">
+  <button class="scan-launch ai" id="ai-scan-launch" title="AI SCAN — ask Llama 3.1 (via Cloudflare Workers AI) to invent one unexpected correlation, optionally seeded with a topic. No external data is fetched; the card is a hypothesis to investigate. Full audit trail shown: system prompt, user prompt, raw model output, and parsed card.">
     <span class="scan-launch-dot" id="ai-scan-launch-dot"></span>
     <span>AI scan</span>
   </button>
@@ -2324,22 +2324,19 @@ function applyFilters() {
       }
       return true;
     })
-    .sort((a, b) => {
-      // base relevance is |r|; add a bounded preference nudge so liked
-      // domains float up and disliked ones sink, without overpowering r
-      const sa = Math.abs(a.strength) + 0.15 * Math.tanh(preferenceScore(a) / 5);
-      const sb = Math.abs(b.strength) + 0.15 * Math.tanh(preferenceScore(b) / 5);
-      return sb - sa;
-    });
+    .sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
 }
 
-function updateCount() {
+function updateCount(visible) {
   const el = document.getElementById("count");
   const next = state.feed.length;
   const prev = parseInt(el.dataset.last || "0", 10);
   const isInitial = el.dataset.last === undefined;
-  el.textContent = next;
+  el.textContent = (visible != null && visible < next) ? `${visible}/${next}` : `${next}`;
   el.dataset.last = String(next);
+  el.title = (visible != null && visible < next)
+    ? `${visible} visible · ${next} total in feed. Filters are hiding ${next - visible}.`
+    : `${next} correlations in feed`;
   if (isInitial || next <= prev) return;
 
   el.classList.remove("bump");
@@ -2368,7 +2365,14 @@ function updateCount() {
 let _idCounter = 0;
 function newId() { return `c${Date.now().toString(36)}_${++_idCounter}`; }
 function ensureIds() {
-  state.feed.forEach(i => { if (!i.id) i.id = newId(); });
+  // Stamp id + addedAt on every card. addedAt timestamps drive the
+  // feed's "newest first" sort. Cards inserted in the same render
+  // tick share a timestamp; stable sort preserves their array order.
+  const now = Date.now();
+  state.feed.forEach(i => {
+    if (!i.id) i.id = newId();
+    if (i.addedAt == null) i.addedAt = now;
+  });
 }
 
 // =====================================================================
@@ -3759,7 +3763,7 @@ function render() {
 
   feedEl.innerHTML = "";
   const items = applyFilters();
-  updateCount();
+  updateCount(items.length);
   if (items.length === 0) {
     feedEl.innerHTML = `<div class="empty">No correlations match your filters.<br/>Try clearing the search or enabling more sources.</div>`;
     return;
@@ -3886,6 +3890,33 @@ function wireSourceChips() {
   });
 }
 
+// Tooltips shown on the four source chips. Set once, then suffixed
+// with the live count inside updateSourceChipSizes.
+const SOURCE_TOOLTIPS = {
+  curated:
+    "CURATED — the hand-picked archive of famous, well-documented odd " +
+    "correlations baked into the app (Vigen's spurious time series, the " +
+    "stork/birth paper, chocolate↔Nobel, etc.). Each card cites a real " +
+    "study or canonical reference. Most trustworthy starting point.",
+  generated:
+    "GENERATED — hypothetical pairings invented by the app. Two kinds: " +
+    "(1) template-generated random topic pairs that appear when you " +
+    "reload the feed or dismiss a card, and (2) AI-generated correlations " +
+    "from the AI scan terminal (Llama 3.1 via Cloudflare Workers AI). " +
+    "No data has been fetched for these — they're invitations to investigate.",
+  live:
+    "LIVE — fresh random article pairs pulled from Wikipedia's REST API " +
+    "in the background. Both sides are real Wikipedia entities; the " +
+    "'correlation' is pure juxtaposition until you investigate. Click " +
+    "the Wikipedia A / Wikipedia B buttons on the card to see the source.",
+  scanned:
+    "SCANNED — cards emitted by the User scan terminal. Each one was " +
+    "surfaced from a real public-data pipeline (Wikipedia opensearch → " +
+    "page summary → page links → Datamuse semantic field → OpenLibrary " +
+    "→ random sampling). Each card retains the scan query and source URLs " +
+    "so you can audit how it was found.",
+};
+
 function updateSourceChipSizes() {
   // Size each source chip by the number of feed items under that source —
   // mirrors the domain cloud's frequency-as-size visualization.
@@ -3907,7 +3938,8 @@ function updateSourceChipSizes() {
     const padY = 3 + ratio * 3;            // 3 → 6 px
     chip.style.fontSize = `${fontSize.toFixed(1)}px`;
     chip.style.padding = `${padY.toFixed(1)}px ${padX.toFixed(1)}px`;
-    chip.title = `${s} — ${c} card${c === 1 ? "" : "s"}`;
+    const desc = SOURCE_TOOLTIPS[s] || s;
+    chip.title = `${desc}\n\nCurrently: ${c} card${c === 1 ? "" : "s"} in feed. Click to toggle. ⌘/Ctrl-click to solo.`;
   });
 }
 
