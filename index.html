@@ -36,7 +36,31 @@
   }
   header h1 .dot { color: var(--accent-2); }
   header .tag {
-    color: var(--ink-dim); font-size: 12px; letter-spacing: 0.08em;
+    font-size: 12px; letter-spacing: 0.08em;
+    color: transparent;
+    background-image: linear-gradient(
+      105deg,
+      var(--ink-dim) 0%,
+      var(--ink-dim) 38%,
+      var(--ink) 48%,
+      #ffffff 50%,
+      var(--ink) 52%,
+      var(--ink-dim) 62%,
+      var(--ink-dim) 100%
+    );
+    background-size: 300% 100%;
+    background-position-x: 100%;
+    background-repeat: no-repeat;
+    background-clip: text;
+    -webkit-background-clip: text;
+    cursor: default;
+  }
+  header .tag:hover {
+    animation: tagShimmer 0.95s cubic-bezier(.4, 0, .55, 1);
+  }
+  @keyframes tagShimmer {
+    0%   { background-position-x: 100%; }
+    100% { background-position-x: -55%; }
   }
   header .grow { flex: 1; }
   header .status {
@@ -1451,7 +1475,7 @@
 
 <header>
   <h1>CORR<span class="dot">.</span>AI</h1>
-  <span class="tag">// the unexpected correlation engine</span>
+  <span class="tag">// the correlation engine</span>
   <button class="header-btn auth-btn" id="auth-btn" title="Sign in to unlock favorites & canvas">
     <span class="header-btn-dot" id="auth-btn-dot"></span>
     <span id="auth-btn-label">Log in</span>
