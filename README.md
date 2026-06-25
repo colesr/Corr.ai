@@ -1,5 +1,5 @@
 # Corr.ai
-the unexpected correlation engine
+the correlation engine
 
 <img width="1284" height="844" alt="image" src="https://github.com/user-attachments/assets/4e435459-48ca-482e-a557-4b050857042c" />
 
